@@ -1,0 +1,75 @@
+__pycache__/
+*.pyc
+*.log
+
+# 모델, 데이터셋 등 대용량 파일
+ml_models/
+*.h5
+*.pt
+*.pkl
+*.pth
+*.ckpt
+*.onnx
+*.zip
+*.tar.gz
+*.npz
+
+# 환경 파일
+.env
+
+# 미디어 파일 (필요시)
+media/
+# Media files
+media/
+static/media/
+uploads/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp4
+*.avi
+*.mov
+*.pdf
+*.zip
+*.tar.gz
+
+# ML Models
+ml_models/
+*.joblib
+*.model
+*.pth
+*.pkl
+*.h5
+*.bin
+
+# Logs
+logs/
+*.log
+# Media files
+media/
+static/media/
+uploads/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp4
+*.avi
+*.mov
+*.pdf
+*.zip
+*.tar.gz
+
+# ML Models
+ml_models/
+*.joblib
+*.model
+*.pth
+*.pkl
+*.h5
+*.bin
+
+# Logs
+logs/
+*.log

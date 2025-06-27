@@ -12,7 +12,6 @@ import RadiologistPanel from './pages/RadiologistPanel';
 import DashboardPage from './pages/DashboardPage';
 import NursePanel from './pages/NursePanel';
 import LabResultPage from './pages/LabResultPage';
-import OmicsAnalysisPage from './pages/OmicsAnalysisPage';
 import OmicsResultPage from './pages/OmicsResultPage';
 import PredictionPage from './pages/PredictionPage';
 import AboutPage from './pages/AboutPage';
@@ -121,14 +120,6 @@ function App() {
                 element={
                   <PrivateRouteWithRole role="doctor">
                     <PredictionPage />
-                  </PrivateRouteWithRole>
-                }
-              />
-              <Route
-                path="/omics-analysis"
-                element={
-                  <PrivateRouteWithRole role="nurse">
-                    <OmicsAnalysisPage />
                   </PrivateRouteWithRole>
                 }
               />
