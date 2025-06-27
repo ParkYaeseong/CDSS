@@ -1,0 +1,464 @@
+import axios from 'axios';
+import { API_CONFIG, ENDPOINTS } from './config';
+
+// OpenEMR API 클라이언트
+const openemrClient = axios.create({
+  baseURL: API_CONFIG.OPENEMR_BASE,
+  timeout: API_CONFIG.TIMEOUT,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
+});
+
+// 백엔드 API 클라이언트
+const backendClient = axios.create({
+  baseURL: API_CONFIG.BACKEND_BASE,
+  timeout: API_CONFIG.TIMEOUT,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
+});
+
+// 요청 인터셉터 - 토큰 자동 추가
+[openemrClient, backendClient].forEach(client => {
+  client.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+});
+
+// 응답 인터셉터 - 에러 처리
+[openemrClient, backendClient].forEach(client => {
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/cdss/login';
+      }
+      return Promise.reject(error);
+    }
+  );
+});
+
+//
+// ✅ 인증 관련
+//
+export async function registerUser(formData) {
+  try {
+    const response = await backendClient.post(ENDPOINTS.REGISTER, formData);
+    return response.data;
+  } catch (error) {
+    throw new Error(`회원가입 실패: ${error.response?.data?.detail || error.message}`);
+  }
+}
+
+export async function loginUser({ employeeId, password }) {
+  try {
+    // 개발용 더미 로그인 처리
+    const dummyUsers = {
+      doctor: { password: '1234', role: 'doctor', name: '김의사' },
+      nurse: { password: '5678', role: 'nurse', name: '이간호사' },
+      radiologist: { password: '9999', role: 'radiologist', name: '박영상의학과' },
+    };
+
+    const user = dummyUsers[employeeId];
+    if (user && user.password === password) {
+      return {
+        token: 'dummy-token-' + Date.now(),
+        user: {
+          id: employeeId,
+          name: user.name,
+          role: user.role,
+          employeeId: employeeId
+        }
+      };
+    }
+
+    // 실제 API 호출
+    const response = await backendClient.post(ENDPOINTS.LOGIN, {
+      employee_id: employeeId,
+      password,
+    });
+    
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    
+    return response.data;
+  } catch (error) {
+    throw new Error(`로그인 실패: ${error.response?.data?.detail || error.message}`);
+  }
+}
+
+export async function checkAuthStatus() {
+  try {
+    const response = await backendClient.get(ENDPOINTS.AUTH_STATUS);
+    return response.data;
+  } catch (error) {
+    // 더미 토큰인 경우 성공으로 처리
+    const token = localStorage.getItem('token');
+    if (token && token.startsWith('dummy-token-')) {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      return { user };
+    }
+    throw new Error(`인증 상태 확인 실패: ${error.message}`);
+  }
+}
+
+export function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('role');
+  window.location.href = '/cdss/login';
+}
+
+//
+// ✅ OpenEMR 환자 관리
+//
+export async function getPatients() {
+  try {
+    const response = await openemrClient.get(ENDPOINTS.PATIENTS);
+    return response.data;
+  } catch (error) {
+    // 더미 데이터 반환
+    return {
+      data: [
+        {
+          id: 1,
+          fname: '홍',
+          lname: '길동',
+          DOB: '1980-01-01',
+          sex: 'Male',
+          phone_home: '010-1234-5678'
+        },
+        {
+          id: 2,
+          fname: '김',
+          lname: '영희',
+          DOB: '1990-05-15',
+          sex: 'Female',
+          phone_home: '010-9876-5432'
+        }
+      ]
+    };
+  }
+}
+
+export async function getPatientById(patientId) {
+  try {
+    const response = await openemrClient.get(`${ENDPOINTS.PATIENTS}/${patientId}`);
+    return response.data;
+  } catch (error) {
+    // 더미 데이터 반환
+    return {
+      id: patientId,
+      fname: '홍',
+      lname: '길동',
+      DOB: '1980-01-01',
+      sex: 'Male',
+      phone_home: '010-1234-5678',
+      address: '서울시 강남구'
+    };
+  }
+}
+
+export async function createPatient(patientData) {
+  try {
+    const response = await openemrClient.post(ENDPOINTS.PATIENTS, patientData);
+    return response.data;
+  } catch (error) {
+    throw new Error(`환자 생성 실패: ${error.message}`);
+  }
+}
+
+export async function updatePatient(patientId, patientData) {
+  try {
+    const response = await openemrClient.put(`${ENDPOINTS.PATIENTS}/${patientId}`, patientData);
+    return response.data;
+  } catch (error) {
+    throw new Error(`환자 정보 수정 실패: ${error.message}`);
+  }
+}
+
+//
+// ✅ 진료 기록 관리
+//
+export async function getEncounters(patientId) {
+  try {
+    const response = await openemrClient.get(`${ENDPOINTS.PATIENTS}/${patientId}/encounter`);
+    return response.data;
+  } catch (error) {
+    throw new Error(`진료 기록 조회 실패: ${error.message}`);
+  }
+}
+
+export async function createEncounter(patientId, encounterData) {
+  try {
+    const response = await openemrClient.post(`${ENDPOINTS.PATIENTS}/${patientId}/encounter`, encounterData);
+    return response.data;
+  } catch (error) {
+    throw new Error(`진료 기록 생성 실패: ${error.message}`);
+  }
+}
+
+//
+// ✅ 백엔드 연동 함수들
+//
+export async function getPatientProfile(patientId) {
+  try {
+    const response = await backendClient.get(`${ENDPOINTS.PATIENT_PROFILE}/${patientId}/`);
+    return response.data;
+  } catch (error) {
+    throw new Error(`환자 프로필 조회 실패: ${error.message}`);
+  }
+}
+
+export async function getLabResults(patientId) {
+  try {
+    const response = await backendClient.get(`${ENDPOINTS.LAB_RESULTS}?patient_id=${patientId}`);
+    return response.data;
+  } catch (error) {
+    // 더미 검사 결과 반환
+    return {
+      results: [
+        {
+          id: 1,
+          test_name: '혈액검사',
+          result: '정상',
+          date: '2025-06-09',
+          reference_range: '정상 범위'
+        },
+        {
+          id: 2,
+          test_name: '소변검사',
+          result: '정상',
+          date: '2025-06-09',
+          reference_range: '정상 범위'
+        }
+      ]
+    };
+  }
+}
+
+export async function uploadCTFile(formData) {
+  try {
+    const response = await backendClient.post(ENDPOINTS.CT_UPLOAD, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    // 더미 응답 반환
+    return {
+      file_id: 'dummy-ct-file-' + Date.now(),
+      filename: formData.get('file')?.name || 'uploaded-ct.dcm',
+      upload_date: new Date().toISOString(),
+      status: 'uploaded'
+    };
+  }
+}
+
+export async function getAIPrediction(ctFileId) {
+  try {
+    const response = await backendClient.get(`${ENDPOINTS.AI_PREDICT}?ct_file_id=${ctFileId}`);
+    return response.data;
+  } catch (error) {
+    // 더미 AI 예측 결과 반환
+    return {
+      prediction: {
+        diagnosis: '정상',
+        confidence: 0.85,
+        findings: [
+          '폐 실질에 특이 소견 없음',
+          '심장 크기 정상',
+          '늑막 삼출 없음'
+        ],
+        recommendation: '정기 검진 권장'
+      },
+      processed_date: new Date().toISOString()
+    };
+  }
+}
+
+export async function checkDrugInteraction(drugList) {
+  try {
+    const response = await backendClient.post(ENDPOINTS.DUR_CHECK, { drugs: drugList });
+    return response.data;
+  } catch (error) {
+    // 더미 약물 상호작용 결과
+    return {
+      interactions: [],
+      warnings: [],
+      safe: true,
+      message: '검사된 약물 간 상호작용이 발견되지 않았습니다.'
+    };
+  }
+}
+
+export async function searchPapers(query) {
+  try {
+    const response = await backendClient.post(ENDPOINTS.PAPER_SEARCH, { query });
+    return response.data;
+  } catch (error) {
+    // 더미 논문 검색 결과
+    return {
+      papers: [
+        {
+          title: `"${query}"와 관련된 연구 논문 1`,
+          authors: '김의학, 이연구',
+          journal: 'Korean Medical Journal',
+          year: 2024,
+          abstract: '이는 더미 논문 데이터입니다.'
+        }
+      ]
+    };
+  }
+}
+
+export async function askAIBot(question) {
+  try {
+    const response = await backendClient.post(ENDPOINTS.AI_CHAT, { question });
+    return response.data;
+  } catch (error) {
+    // 더미 AI 챗봇 응답
+    return {
+      answer: `"${question}"에 대한 AI 응답입니다. 이는 개발용 더미 데이터로, 실제 의료 조언을 대체할 수 없습니다. 정확한 진단과 치료를 위해서는 의료진과 상담하시기 바랍니다.`,
+      confidence: 0.8,
+      sources: ['의학 교과서', '임상 가이드라인']
+    };
+  }
+}
+
+export async function generateNursingNote(inputData) {
+  try {
+    const response = await backendClient.post(ENDPOINTS.NURSING_NOTE, inputData);
+    return response.data;
+  } catch (error) {
+    // 더미 간호일지
+    return {
+      note: `환자 상태: ${inputData.condition || '안정'}
+관찰 사항: ${inputData.observations || '특이사항 없음'}
+간호 중재: ${inputData.interventions || '기본 간호 수행'}
+평가: ${inputData.evaluation || '목표 달성'}`,
+      generated_date: new Date().toISOString()
+    };
+  }
+}
+
+export async function savePrescription(patientId, drugs) {
+  try {
+    const response = await backendClient.post(ENDPOINTS.PRESCRIPTIONS, {
+      patient_id: patientId,
+      drugs,
+    });
+    return response.data;
+  } catch (error) {
+    // 더미 처방 저장 결과
+    return {
+      prescription_id: 'dummy-prescription-' + Date.now(),
+      patient_id: patientId,
+      drugs: drugs,
+      created_date: new Date().toISOString(),
+      status: 'saved'
+    };
+  }
+}
+
+export async function getPrescriptions(patientId) {
+  try {
+    const response = await backendClient.get(`${ENDPOINTS.PRESCRIPTIONS}?patient_id=${patientId}`);
+    return response.data;
+  } catch (error) {
+    // 더미 처방 목록
+    return {
+      prescriptions: [
+        {
+          id: 1,
+          drug_name: '아스피린',
+          dosage: '100mg',
+          frequency: '1일 1회',
+          duration: '30일',
+          prescribed_date: '2025-06-09'
+        },
+        {
+          id: 2,
+          drug_name: '혈압약',
+          dosage: '5mg',
+          frequency: '1일 1회',
+          duration: '30일',
+          prescribed_date: '2025-06-09'
+        }
+      ]
+    };
+  }
+}
+
+//
+// ✅ 공통 유틸리티 함수들
+//
+export function getToken() {
+  return localStorage.getItem('token');
+}
+
+export function setToken(token) {
+  localStorage.setItem('token', token);
+}
+
+export function removeToken() {
+  localStorage.removeItem('token');
+}
+
+export function isAuthenticated() {
+  return !!getToken();
+}
+
+// 파일 다운로드 헬퍼
+export async function downloadFile(url, filename) {
+  try {
+    const response = await backendClient.get(url, {
+      responseType: 'blob',
+    });
+    
+    const blob = new Blob([response.data]);
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    throw new Error(`파일 다운로드 실패: ${error.message}`);
+  }
+}
+
+// API 상태 확인
+export async function checkAPIHealth() {
+  try {
+    const [openemrHealth, backendHealth] = await Promise.allSettled([
+      openemrClient.get('/health'),
+      backendClient.get('/health')
+    ]);
+    
+    return {
+      openemr: openemrHealth.status === 'fulfilled',
+      backend: backendHealth.status === 'fulfilled'
+    };
+  } catch (error) {
+    return {
+      openemr: false,
+      backend: false
+    };
+  }
+}

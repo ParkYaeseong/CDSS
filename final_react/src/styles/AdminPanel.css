@@ -1,0 +1,801 @@
+/* src/styles/AdminPanel.css */
+.admin-panel {
+  min-height: 100vh;
+  background-color: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 헤더 - 딥 티얼 그라데이션 */
+.admin-header {
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.header-left h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-greeting {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.9);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+}
+
+/* 네비게이션 */
+.admin-nav {
+  background: white;
+  padding: 0;
+  display: flex;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.nav-item {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.nav-item.active {
+  color: #0891b2;
+  background: #f0fdff;
+  border-bottom: 2px solid #0891b2;
+}
+
+.nav-item:hover {
+  color: #0891b2;
+  background: #e0fbff;
+}
+
+.nav-icon {
+  font-size: 1.5rem;
+}
+
+.nav-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* 메인 콘텐츠 */
+.admin-content {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 알림 배너 - 딥 티얼 그라데이션 */
+.notification-banner {
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.new-badge {
+  background: #ff4757;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.banner-text h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+}
+
+.banner-text p {
+  margin: 0;
+  color: rgba(255,255,255,0.9);
+  font-size: 0.95rem;
+}
+
+/* 통계 섹션 */
+.stats-section {
+  margin-bottom: 2rem;
+}
+
+.stats-section h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(8, 145, 178, 0.1);
+  border: 1px solid rgba(8, 145, 178, 0.1);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0891b2;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* 메인 콘텐츠 그리드 */
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* 스케줄 섹션 */
+.schedule-section,
+.monitoring-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(8, 145, 178, 0.08);
+  border: 1px solid rgba(8, 145, 178, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.more-btn,
+.time-filter {
+  background: #e0fbff;
+  border: 1px solid #0891b2;
+  color: #0891b2;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.more-btn:hover,
+.time-filter:hover {
+  background: #0891b2;
+  color: white;
+}
+
+/* 부서별 스케줄 */
+.dept-row,
+.room-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dept-row:last-child,
+.room-item:last-child {
+  border-bottom: none;
+}
+
+.dept-name,
+.room-number {
+  font-weight: 600;
+  color: #333;
+  min-width: 80px;
+}
+
+.dept-time {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.dept-status,
+.room-status {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.dept-status.available,
+.room-status.in-progress {
+  background: #d4f1f0;
+  color: #0b5e5e;
+}
+
+.dept-status.closed,
+.room-status.waiting {
+  background: #fff2f0;
+  color: #d63031;
+}
+
+/* FAQ 섹션 */
+.faq-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(8, 145, 178, 0.08);
+  border: 1px solid rgba(8, 145, 178, 0.1);
+}
+
+.faq-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.faq-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.faq-tab {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e9ecef;
+  background: #f7f8fa;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.faq-tab.active {
+  background: #0891b2;
+  border-color: #0891b2;
+  color: white;
+}
+
+.faq-tab:hover {
+  border-color: #0891b2;
+  color: #0891b2;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.faq-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f0fdff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(8, 145, 178, 0.1);
+}
+
+.faq-item:hover {
+  background: #e0fbff;
+  border-color: #0891b2;
+}
+
+.faq-number {
+  font-weight: 600;
+  color: #0891b2;
+  min-width: 20px;
+}
+
+.faq-question {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.faq-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.faq-badge.urgent {
+  background: #ff4757;
+  color: white;
+}
+
+.faq-badge.normal {
+  background: #0891b2;
+  color: white;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .admin-content {
+    padding: 1rem;
+  }
+  
+  .main-content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .nav-item {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .nav-text {
+    font-size: 0.75rem;
+  }
+}
+
+/* 환자 관리 스타일 추가 */
+.patient-management {
+  padding: 1rem 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.add-button {
+  background: #0891b2;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+  background: #0e7490;
+}
+
+.search-section {
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 500px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0891b2;
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+}
+
+.table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(8, 145, 178, 0.08);
+  border: 1px solid rgba(8, 145, 178, 0.1);
+  margin: 0 1rem;
+}
+
+.patients-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.patients-table thead {
+  background: #f8f9fa;
+}
+
+.patients-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e9ecef;
+  white-space: nowrap;
+}
+
+.patients-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.patients-table tbody tr:hover {
+  background-color: #f8fbff;
+}
+
+.patients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.patient-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(8, 145, 178, 0.08);
+  border: 1px solid rgba(8, 145, 178, 0.1);
+}
+
+.patient-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.patient-id {
+  font-weight: 600;
+  color: #0891b2;
+}
+
+.patient-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.patient-details,
+.patient-contact {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.patient-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.action-button.visit {
+  background: #0891b2;
+  color: white;
+}
+
+.action-button.visit:hover {
+  background: #0e7490;
+}
+
+.action-button.view {
+  background: #0891b2;
+  color: white;
+}
+
+.action-button.edit {
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #e9ecef;
+}
+
+.action-button.edit:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.action-button:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+  font-style: italic;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  background: white;
+  border-radius: 12px;
+  margin: 0 1rem;
+  box-shadow: 0 2px 12px rgba(8, 145, 178, 0.08);
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content.large {
+  max-width: 800px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patient-form,
+.visit-form {
+  padding: 1.5rem;
+}
+
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.form-section h4 {
+  margin: 0 0 1rem 0;
+  color: #0891b2;
+  font-size: 1.1rem;
+  border-bottom: 2px solid #e0fbff;
+  padding-bottom: 0.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.form-actions button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.form-actions button[type="button"] {
+  background: #f8f9fa;
+  color: #666;
+}
+
+.form-actions button[type="submit"] {
+  background: #0891b2;
+  color: white;
+}
+
+.form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .patients-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .patients-table {
+    font-size: 0.85rem;
+  }
+  
+  .patients-table th,
+  .patients-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .patient-management {
+    padding: 0.5rem 0;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .table-container {
+    margin: 0 0.5rem;
+    overflow-x: auto;
+  }
+  
+  .patients-table {
+    min-width: 800px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}

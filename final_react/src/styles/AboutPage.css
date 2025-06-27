@@ -1,0 +1,175 @@
+.about-container {
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #f5f8fa;
+  min-height: 100vh;
+}
+
+.about-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 60px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #0077b6;
+  cursor: pointer;
+}
+
+.home-button {
+  padding: 8px 16px;
+  border: 2px solid #0077b6;
+  border-radius: 20px;
+  background-color: transparent;
+  color: #0077b6;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.home-button:hover {
+  background-color: #0077b6;
+  color: white;
+}
+
+.about-main {
+  padding: 60px;
+  text-align: center;
+}
+
+.description {
+  font-size: 16px;
+  margin-bottom: 40px;
+  color: #444;
+}
+
+.card-section {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.info-card {
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 300px;
+  text-align: left;
+}
+
+.info-card h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #003049;
+}
+
+.info-card ul {
+  padding-left: 20px;
+  color: #444;
+}
+
+.info-card li {
+  margin-bottom: 8px;
+}
+
+.info-card a {
+  text-decoration: none;
+  color: #0077b6;
+}
+
+.info-card a:hover {
+  text-decoration: underline;
+}
+
+.goal-card {
+  margin-top: 60px;
+  background-color: #e0f7fa;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.goal-card h2 {
+  font-size: 22px;
+  color: #005f8e;
+  margin-bottom: 10px;
+}
+
+.goal-card p {
+  color: #444;
+  font-size: 16px;
+}
+
+.section {
+  margin-bottom: 60px;
+  padding: 0 20px;
+}
+
+.section h1,
+.section h2 {
+  color: #003049;
+  font-size: 26px;
+  margin-bottom: 16px;
+}
+
+.section p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #444;
+}
+
+.section ul {
+  list-style-type: disc;
+  padding-left: 30px;
+  color: #444;
+  font-size: 15px;
+}
+
+.section li {
+  margin-bottom: 10px;
+}
+
+.value-section {
+  background-color: #f1faff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.feature-section,
+.tech-section {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.goal-card {
+  background-color: #e0f7fa;
+  padding: 40px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 800px;
+  margin: 60px auto 0;
+}
+
+.goal-card h2 {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: #0077b6;
+}
+
+.goal-card p {
+  font-size: 16px;
+  color: #444;
+  line-height: 1.6;
+}

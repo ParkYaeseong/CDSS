@@ -1,0 +1,271 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* --- 기본 레이아웃 --- */
+.vision-container { padding: 4rem; background-color: #f9fafb; color: #333; font-family: 'Noto Sans KR', sans-serif; overflow-x: hidden; }
+/* --- 공용 컴포넌트 --- */
+.home-button { background-color: #0077b6; color: white; font-family: 'Noto Sans KR', sans-serif; font-size: 0.9rem; font-weight: 500; padding: 0.6rem 1.2rem; border: none; border-radius: 8px; margin-bottom: 2.5rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 119, 182, 0.2); }
+.home-button:hover { background-color: #023e8a; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(2, 62, 138, 0.3); }
+/* --- 섹션별 스타일 --- */
+.page-header { text-align: center; margin-bottom: 4rem; }
+.content-section { max-width: 960px; margin: 0 auto 4rem auto; padding: 2.5rem; background-color: #ffffff; border-radius: 16px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07); }
+.content-section:nth-of-type(even) { background-color: #f8f9fa; }
+/* --- 타이포그래피 (글자 스타일) --- */
+.page-header h1 { font-size: 2.5rem; font-weight: 700; color: #1d3557; margin: 0; line-height: 1.3; }
+.page-header .highlight { color: #0077b6; }
+.page-header .subtitle { font-size: 1.1rem; color: #6c757d; max-width: 800px; margin: 1rem auto 0 auto; line-height: 1.7; }
+.content-section h2 { font-size: 1.8rem; font-weight: 700; color: #1d3557; margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 2px solid #e9ecef; }
+.content-section h3, .chart-title { font-size: 1.4rem; color: #0077b6; margin-top: 2rem; margin-bottom: 1.5rem; text-align: center; }
+.content-section h4, .chart-wrapper h4 { font-size: 1.1rem; color: #495057; margin-bottom: 1rem; font-weight: 500; }
+.content-section p { font-size: 1rem; line-height: 1.8; color: #495057; margin-bottom: 1rem; }
+.chart-section { margin-top: 3rem; }
+.interactive-section { margin-top: 3rem; border-top: 1px solid #e9ecef; padding-top: 2rem; }
+.summary-text { margin-top: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; font-style: italic; color: #495057; }
+
+/* --- 뷰 전환 및 테이블/카드/차트 스타일 --- */
+.performance-view-section { margin-top: 2rem; }
+.view-toggle { display: flex; justify-content: center; margin-bottom: 2rem; gap: 0.5rem; background-color: #e9ecef; padding: 0.4rem; border-radius: 10px; width: fit-content; margin-left: auto; margin-right: auto; }
+.view-toggle button { padding: 0.5rem 1rem; border: none; border-radius: 7px; background-color: transparent; color: #495057; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+.view-toggle button.active { background-color: #ffffff; color: #0077b6; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.table-container { margin-top: 1rem; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.95rem; }
+th, td { padding: 1rem; border-bottom: 1px solid #e9ecef; }
+thead tr { background-color: #f8f9fa; color: #005f87; font-weight: 500; }
+tbody tr:hover { background-color: #f1f3f5; }
+.scorecard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+.scorecard { display: flex; flex-direction: column; background-color: #fff; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef; transition: all 0.3s ease; }
+.scorecard:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color: transparent; }
+.scorecard-title { font-size: 1.2rem; color: #0077b6; margin-bottom: 1.5rem; font-weight: 700; text-align: center; }
+.score-item-container { display: flex; justify-content: space-around; width: 100%; margin-bottom: 1rem; }
+.scorecard-item { text-align: center; }
+.score-value { display: block; font-size: 1.8rem; font-weight: 700; color: #1d3557; }
+.score-label { font-size: 0.9rem; color: #6c757d; }
+.mini-chart-container { margin-top: auto; padding-top: 1rem; border-top: 1px solid #f0f0f0; }
+.omics-selector { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+.omics-selector button { padding: 0.6rem 1.2rem; border-radius: 8px; border: 1px solid #dee2e6; background-color: #fff; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+.omics-selector button.active, .omics-selector button:hover { background-color: #0077b6; color: #fff; border-color: #0077b6; }
+.flex-container { display: flex; gap: 2rem; align-items: flex-start; }
+.kpi-container.mini { flex: 1; }
+.kpi-container.mini .kpi-card { margin-bottom: 0.5rem; }
+
+/* [신규] 혼동 행렬 스타일 */
+.cm-wrapper { flex: 1.5; }
+.confusion-matrix { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+.confusion-matrix .cm-header { font-weight: 500; color: #495057; padding: 0.5rem; }
+.confusion-matrix .cm-cell { border: 1px solid #dee2e6; padding: 1rem; text-align: center; font-size: 1.2rem; font-weight: 700; border-radius: 4px; }
+.confusion-matrix .true-positive { background-color: #d4edda; color: #155724; }
+.confusion-matrix .true-negative { background-color: #d1ecf1; color: #0c5460; }
+.confusion-matrix .false-positive, .confusion-matrix .false-negative { background-color: #f8d7da; color: #721c24; }
+.tab-content .chart-wrapper { margin-top: 2rem; }
+.tab-content .chart-wrapper h4 { text-align: left; }
+
+/* --- 애니메이션 --- */
+.page-header, .content-section { opacity: 0; animation: fadeUp 1.5s ease-out forwards; }
+.vision-container > *:nth-child(2) { animation-delay: 0.1s; }
+.vision-container > *:nth-child(3) { animation-delay: 0.2s; }
+.vision-container > *:nth-child(4) { animation-delay: 0.3s; }
+.vision-container > *:nth-child(5) { animation-delay: 0.4s; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- [신규 추가] 파이프라인 시각화 섹션 스타일 --- */
+.pipeline-steps-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.pipeline-step {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.step-icon {
+  font-size: 3rem; /* 아이콘 크기 */
+  color: #0077b6; /* 아이콘 색상 */
+  margin-bottom: 1.5rem;
+}
+
+.pipeline-step h3 {
+  font-size: 1.2rem;
+  color: #1d3557;
+  margin-bottom: 1rem;
+}
+
+.pipeline-step p {
+  font-size: 0.95rem;
+  color: #6c757d;
+  line-height: 1.7;
+}
+
+/* 화면이 좁아지면 세로로 쌓이도록 반응형 처리 */
+@media (max-width: 768px) {
+  .pipeline-steps-container {
+    flex-direction: column;
+  }
+}
+
+/* --- [신규 추가] 정밀도/재현율 설명 스타일 --- */
+.pr-interpretation {
+  flex: 1.5;
+  padding-left: 2rem;
+  border-left: 1px solid #e9ecef;
+  margin-left: 2rem;
+}
+
+.pr-interpretation h4 {
+  font-size: 1.1rem;
+  color: #1d3557;
+  margin-top: 0;
+}
+
+.pr-interpretation p {
+  font-size: 0.95rem;
+}
+
+.pr-interpretation strong {
+  color: #0077b6;
+  font-weight: 700;
+}
+
+/* flex-container 내부 요소들의 배치를 위한 추가 스타일 */
+.tab-content .flex-container {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.kpi-container.mini {
+  flex: 1;
+}
+
+.cm-wrapper {
+  flex: 1.5;
+}
+
+/* --- 분석 그리드 스타일 --- */
+.analysis-grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2개의 열을 동일한 너비로 */
+  grid-gap: 20px; /* 카드 사이의 간격 */
+  margin-bottom: 40px; /* 하단 차트와의 간격 */
+}
+
+.metric-card {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.metric-card h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #005f87; /* 테마 색상 */
+  font-size: 1.1em;
+}
+
+.metric-value {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #0077b6; /* 테마 색상 강조 */
+  margin: 0;
+}
+
+.metric-description {
+  font-size: 0.9em;
+  color: #555;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+/* KPI 카드 내부 스타일 */
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+.kpi-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+.kpi-item:last-child {
+    border-bottom: none;
+}
+.kpi-label {
+    font-size: 1em;
+    font-weight: bold;
+    color: #333;
+}
+.kpi-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #0077b6;
+}
+
+/* 기존 ConfusionMatrix 컴포넌트와의 조화를 위한 약간의 수정 */
+.metric-card .confusion-matrix {
+    width: 100%;
+    height: 100%;
+}
+.metric-card .cm-wrapper h4 {
+    text-align: center; /* 제목을 카드의 h4와 통일 */
+}
+
+/* ConfusionMatrix 컴포넌트 스타일 (숫자 색상 적용) */
+.cm-wrapper {
+ /* 기존 스타일 유지 */
+ padding: 15px;
+ border-radius: 8px;
+ border: 1px solid #e0e0e0;
+ margin-bottom: 20px;
+ background-color: #fff;
+ box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.confusion-matrix {
+ width: 100%;
+ border-collapse: collapse;
+ text-align: center;
+}
+
+.confusion-matrix td, .confusion-matrix th {
+ border: 1px solid #ddd;
+ padding: 10px;
+}
+
+.cm-label, .cm-header {
+ font-weight: bold;
+ background-color: #f0f0f0;
+}
+
+.cm-cell {
+ /* 기존 스타일 유지 */
+}
+
+.tp-value {
+ color: #2e7d32; /* True Positive: 초록색 계열 */
+ font-weight: bold;
+}
+
+.fp-value {
+ color: #d32f2f; /* False Positive: 붉은색 계열 */
+ font-weight: bold;
+}
+
+.fn-value {
+ color: #d32f2f; /* False Negative: 붉은색 계열 */
+ font-weight: bold;
+}
+
+.tn-value {
+ color: #1976d2; /* True Negative: 파란색 계열 (또는 초록색 계열) */
+ font-weight: bold;
+}
+

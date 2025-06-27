@@ -1,0 +1,109 @@
+    const [error, setError] = useState(null);
+    // ✅ useAuth()는 이제 isLoading 상태도 함께 가져옵니다.
+    const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+
+    useEffect(() => {
+        // 인증 정보 로딩이 끝나고, 로그인 상태가 확정된 후에만 로직을 실행합니다.
+        if (isAuthLoading) {
+            return; // 아직 인증 상태를 확인 중이면 아무것도 하지 않습니다.
+        }
+
+        if (!isAuthenticated) {
+            setError('로그인이 필요합니다. 다시 로그인해주세요.');
+            setLoading(false);
+            return;
+        }
+
+        if (!requestId) {
+            setError('분석 요청 ID가 URL에 제공되지 않았습니다.');
+            setLoading(false);
+            return;
+        }
+
+        const fetchResult = async () => {
+            setLoading(true); // 데이터 요청 시작 시 로딩 상태로 설정
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    throw new Error('로그인 토큰을 찾을 수 없습니다.');
+                }
+
+                const response = await axios.get(
+                    `/cdss/api/omics/requests/${requestId}/`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }
+                );
+                setData(response.data);
+                setError(null);
+            } catch (err) {
+                console.error("Error fetching omics result:", err);
+                const errorMessage = err.response?.data?.detail || '분석 결과를 불러오는 데 실패했습니다.';
+                setError(errorMessage);
+                setData(null);
+            } finally {
+                setLoading(false); // 요청 완료 후 로딩 상태 해제
+            }
+        };
+
+        fetchResult();
+
+        // --- [수정된 부분] ---
+        // 주기적으로 호출하던 setInterval 로직을 완전히 제거했습니다.
+        // useEffect의 의존성 배열도 수정하여, 컴포넌트가 처음 마운트될 때 한 번만 실행되도록 합니다.
+
+    }, [requestId, isAuthenticated, isAuthLoading]); // 인증 로딩 상태가 바뀔 때도 useEffect가 재실행되도록 추가
+
+    // --- 렌더링 로직 (기존과 거의 동일) ---
+    if (loading || isAuthLoading) { // 인증 정보를 불러오는 중에도 로딩 인디케이터를 보여줍니다.
+        return (
+            <div className="flex justify-center items-center h-40">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                <p className="font-bold">오류 발생</p>
+                <p>{error}</p>
+            </div>
+        );
+    }
+
+    if (!data) {
+        return <div className="text-center p-4">데이터가 없습니다.</div>;
+    }
+
+    return (
+        <div className="bg-gray-50 min-h-screen p-4 sm:p-6 lg:p-8">
+            <div className="max-w-4xl mx-auto space-y-6">
+                <h2 className="text-2xl font-bold text-gray-900">오믹스 분석 결과 상세</h2>
+                <RequestInfoCard request={data} />
+
+                {/* 분석 상태에 따라 다른 컴포넌트를 보여주는 로직은 그대로 유지합니다. */}
+                {data.status === 'COMPLETED' && data.result ? (
+                    <ResultCard result={data.result} />
+                ) : data.status === 'FAILED' ? (
+                    <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md">
+                        <p className="font-bold">분석 실패</p>
+                        <p>오류 메시지: {data.error_message || "서버에 기록된 오류 메시지가 없습니다."}</p>
+                    </div>
+                ) : (
+                    <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md flex items-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-800 mr-3"></div>
+                        <div>
+                            <p className="font-bold">분석이 아직 진행 중입니다.</p>
+                            <p>잠시 후 페이지를 새로고침하여 다시 확인해주세요.</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default OmicsResultPage;

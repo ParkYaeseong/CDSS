@@ -1,0 +1,74 @@
+[
+  {
+    "patient_id": "2",
+    "name": "Jane Doe",
+    "gender": "F",
+    "birth_date": "2025-06-05",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "patient_id": "3",
+    "name": "Park Yeaseng",
+    "gender": "M",
+    "birth_date": "1998-06-07",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "patient_id": "4",
+    "name": "강 경화",
+    "gender": "F",
+    "birth_date": "1983-04-13",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "patient_id": "9",
+    "name": "유 빈",
+    "gender": "F",
+    "birth_date": "1996-11-09",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "patient_id": "6",
+    "name": "이 선아",
+    "gender": "F",
+    "birth_date": "1988-04-08",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "patient_id": "8",
+    "name": "남 소영",
+    "gender": "F",
+    "birth_date": "1997-10-17",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "patient_id": "1",
+    "name": "김 이박",
+    "gender": "M",
+    "birth_date": "2000-06-04",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "patient_id": "7",
+    "name": "신 장훈",
+    "gender": "M",
+    "birth_date": "1976-07-23",
+    "phone": "",
+    "address": ""
+  },
+  {
+    "patient_id": "5",
+    "name": "팽 희",
+    "gender": "F",
+    "birth_date": "2002-06-06",
+    "phone": "",
+    "address": ""
+  }
+]

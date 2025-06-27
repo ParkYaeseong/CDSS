@@ -1,0 +1,526 @@
+/* 메시지 버튼 펄스 애니메이션 */
+@keyframes messagePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(33, 150, 243, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
+  }
+}
+
+/* 연락처 목록 다이얼로그 스타일 */
+.contact-list-dialog .MuiDialog-paper {
+  border-radius: 20px !important;
+  overflow: hidden;
+  z-index: 1002 !important;
+}
+
+.contact-search {
+  margin-bottom: 16px !important;
+}
+
+.contact-item {
+  border-radius: 12px !important;
+  margin: 2px 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.contact-item:hover {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  transform: translateY(-1px);
+}
+
+.contact-avatar {
+  margin-right: 12px;
+}
+
+.contact-info {
+  flex: 1;
+}
+
+.contact-name {
+  font-weight: 600 !important;
+  color: #2c3e50 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.contact-details {
+  color: #666 !important;
+  font-size: 0.85rem !important;
+}
+
+/* 탭 스타일 개선 */
+.MuiTabs-root {
+  min-height: 48px;
+}
+
+.MuiTab-root {
+  min-height: 48px;
+  font-weight: 600 !important;
+}
+
+/* 모던 메시지 다이얼로그 */
+.modern-message-dialog {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+.modern-message-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+}
+
+.back-button, .close-button {
+  color: white !important;
+  padding: 8px !important;
+}
+
+.user-info-section {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  margin: 0 16px;
+}
+
+.user-avatar-large {
+  width: 48px !important;
+  height: 48px !important;
+  margin-right: 12px !important;
+  border: 2px solid rgba(255,255,255,0.3) !important;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-name-large {
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  margin-bottom: 2px !important;
+}
+
+.user-status-text {
+  color: rgba(255,255,255,0.8) !important;
+  font-size: 0.85rem !important;
+}
+
+.modern-messages-container {
+  padding: 0 !important;
+  background: #f8f9fa;
+  flex: 1;
+  overflow-y: auto;
+  height: calc(100% - 160px);
+}
+
+.modern-messages-list {
+  padding: 16px !important;
+  min-height: 100%;
+}
+
+.date-separator {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.date-text {
+  background: rgba(0,0,0,0.1);
+  color: #666;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+/* 메시지 아이템 스타일 - 핵심 부분 */
+.message-item {
+  padding: 4px 0 !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  display: flex !important;
+}
+
+.message-item.my-message {
+  justify-content: flex-end !important;
+  flex-direction: row-reverse !important;
+}
+
+.message-item.other-message {
+  justify-content: flex-start !important;
+  flex-direction: row !important;
+}
+
+.message-wrapper {
+  display: flex;
+  align-items: flex-end;
+  max-width: 70%;
+}
+
+.my-message .message-wrapper {
+  flex-direction: row-reverse !important;
+  justify-content: flex-end !important;
+}
+
+.other-message .message-wrapper {
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+}
+
+.message-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  margin-bottom: 20px !important;
+}
+
+.my-message .message-avatar {
+  margin-left: 8px !important;
+  margin-right: 0 !important;
+}
+
+.other-message .message-avatar {
+  margin-right: 8px !important;
+  margin-left: 0 !important;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.my-message .message-content {
+  align-items: flex-end !important;
+}
+
+.other-message .message-content {
+  align-items: flex-start !important;
+}
+
+.message-bubble {
+  padding: 12px 16px;
+  border-radius: 20px;
+  margin-bottom: 4px;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  max-width: 100%;
+}
+
+.my-bubble {
+  background: #007AFF !important;
+  color: white !important;
+  border-bottom-right-radius: 6px !important;
+  border-bottom-left-radius: 20px !important;
+}
+
+.other-bubble {
+  background: white !important;
+  color: #000 !important;
+  border-bottom-left-radius: 6px !important;
+  border-bottom-right-radius: 20px !important;
+  border: 1px solid #e1e5e9 !important;
+}
+
+.message-text {
+  font-size: 0.95rem !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+}
+
+.message-time {
+  font-size: 0.7rem !important;
+  margin: 0 4px !important;
+  color: #8E8E93 !important;
+}
+
+.my-message .message-time {
+  text-align: right !important;
+}
+
+.other-message .message-time {
+  text-align: left !important;
+}
+
+.modern-input-container {
+  background: white;
+  padding: 16px 20px;
+  border-top: 1px solid #e1e5e9;
+  position: sticky;
+  bottom: 0;
+}
+
+.modern-message-input {
+  border-radius: 24px !important;
+}
+
+.modern-message-input .MuiOutlinedInput-root {
+  border-radius: 24px !important;
+  background: #f8f9fa;
+  border: 1px solid #e1e5e9;
+  padding-right: 8px !important;
+}
+
+.modern-message-input .MuiOutlinedInput-root:hover {
+  border-color: #007AFF;
+}
+
+.modern-message-input .MuiOutlinedInput-root.Mui-focused {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 2px rgba(0,122,255,0.1);
+}
+
+.modern-message-input .MuiOutlinedInput-notchedOutline {
+  border: none !important;
+}
+
+.send-button {
+  transition: all 0.2s ease !important;
+}
+
+.send-button:hover {
+  transform: scale(1.05);
+}
+
+/* 스크롤바 스타일링 */
+.modern-messages-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modern-messages-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modern-messages-container::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+.modern-messages-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.3);
+}
+
+/* 애니메이션 효과 */
+.message-item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .modern-message-header {
+    padding: 12px 16px;
+    min-height: 70px;
+  }
+  
+  .user-avatar-large {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .user-name-large {
+    font-size: 1rem !important;
+  }
+  
+  .modern-messages-list {
+    padding: 12px !important;
+  }
+  
+  .message-content {
+    max-width: 85%;
+  }
+  
+  .modern-input-container {
+    padding: 12px 16px;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .modern-messages-container {
+    background: #1a1a1a;
+  }
+  
+  .other-bubble {
+    background: #2d2d2d !important;
+    color: #ffffff !important;
+    border-color: #404040 !important;
+  }
+  
+  .date-text {
+    background: rgba(255,255,255,0.1);
+    color: #cccccc;
+  }
+  
+  .modern-input-container {
+    background: #2d2d2d;
+    border-top-color: #404040;
+  }
+  
+  .modern-message-input .MuiOutlinedInput-root {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #ffffff;
+  }
+}
+
+/* 접근성 개선 */
+.message-bubble:focus {
+  outline: 2px solid #007AFF;
+  outline-offset: 2px;
+}
+
+.send-button:focus {
+  outline: 2px solid #007AFF;
+  outline-offset: 2px;
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .contact-item:hover {
+    background: none !important;
+    transform: none !important;
+  }
+  
+  .contact-item:active {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  }
+  
+  .send-button:hover {
+    transform: none;
+  }
+  
+  .send-button:active {
+    transform: scale(0.95);
+  }
+}
+
+/* 강제 정렬을 위한 추가 스타일 */
+.MuiListItem-root.message-item.my-message {
+  justify-content: flex-end !important;
+  text-align: right !important;
+}
+
+.MuiListItem-root.message-item.other-message {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+/* 메시지 컨테이너 강제 정렬 */
+.my-message > .message-wrapper {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+.other-message > .message-wrapper {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+/* ChatWindow 스타일을 참고한 메시지 정렬 */
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  min-height: 100%;
+}
+
+.message-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 70%;
+  margin-bottom: 8px;
+}
+
+/* 내 메시지 - 오른쪽 정렬 */
+.message-item.user {
+  align-self: flex-end !important;
+  flex-direction: row-reverse !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* 상대방 메시지 - 왼쪽 정렬 */
+.message-item.bot {
+  align-self: flex-start !important;
+  flex-direction: row !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.message-item.user .message-content {
+  align-items: flex-end !important;
+}
+
+.message-item.bot .message-content {
+  align-items: flex-start !important;
+}
+
+.message-bubble {
+  padding: 12px 16px;
+  border-radius: 20px;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.message-item.user .message-bubble {
+  background: #007AFF !important;
+  color: white !important;
+  border-bottom-right-radius: 6px !important;
+}
+
+.message-item.bot .message-bubble {
+  background: white !important;
+  color: black !important;
+  border: 1px solid #e1e5e9 !important;
+  border-bottom-left-radius: 6px !important;
+}
+
+.message-time {
+  font-size: 0.7rem;
+  color: #8E8E93;
+  margin: 0 4px;
+}
+
+.message-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0;
+}
+
+.date-separator {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.date-text {
+  background: rgba(0,0,0,0.1);
+  color: #666;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}

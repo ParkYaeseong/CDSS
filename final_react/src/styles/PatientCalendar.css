@@ -1,0 +1,323 @@
+/* src/components/PatientCalendar.css */
+
+/* 환자 달력 카드 */
+.patient-calendar-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 12px rgba(8, 145, 178, 0.08) !important;
+  border: 1px solid rgba(8, 145, 178, 0.1) !important;
+  background: white !important;
+  height: fit-content !important;
+}
+
+.patient-calendar-content {
+  padding: 1.5rem !important;
+}
+
+/* 헤더 */
+.patient-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.calendar-title {
+  font-weight: 600 !important;
+  color: #0891b2 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.appointment-count-chip {
+  background: #0891b2 !important;
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+/* 오늘 예약 요약 */
+.today-summary {
+  background: linear-gradient(135deg, #e0fbff 0%, #f0fdff 100%);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(8, 145, 178, 0.2);
+}
+
+.today-title {
+  font-weight: 600 !important;
+  color: #0891b2 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.today-appointments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.appointment-chip {
+  font-weight: 500 !important;
+}
+
+.appointment-chip.confirmed {
+  background: #0891b2 !important;
+}
+
+.appointment-chip.pending {
+  background: #ff9800 !important;
+}
+
+.appointment-chip.completed {
+  background: #4caf50 !important;
+}
+
+.appointment-chip.cancelled {
+  background: #f44336 !important;
+}
+
+/* 달력 컨테이너 */
+.patient-calendar-container {
+  margin-bottom: 1rem;
+}
+
+/* 달력 툴바 */
+.patient-calendar-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #0891b2;
+  border-radius: 8px;
+  color: white;
+}
+
+.toolbar-navigation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-button {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+}
+
+.nav-button:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.toolbar-label {
+  color: white !important;
+  font-weight: 600 !important;
+  min-width: 150px;
+  text-align: center;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.today-button,
+.refresh-button {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+}
+
+.today-button:hover,
+.refresh-button:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 달력 스타일 */
+.patient-calendar {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.patient-calendar .rbc-calendar {
+  border: none !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  background: white !important;
+}
+
+.patient-calendar .rbc-header {
+  background: #f8f9fa !important;
+  color: #333 !important;
+  font-weight: 600 !important;
+  padding: 8px 4px !important;
+  border: none !important;
+  border-bottom: 1px solid #e9ecef !important;
+  text-align: center !important;
+  font-size: 0.85rem !important;
+}
+
+.patient-calendar .rbc-date-cell {
+  padding: 6px !important;
+  text-align: center !important;
+  border-right: 1px solid #f0f0f0 !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  font-size: 0.9rem !important;
+}
+
+.patient-calendar .rbc-today {
+  background: #e0fbff !important;
+  color: #0891b2 !important;
+  font-weight: 600 !important;
+}
+
+.patient-calendar .rbc-selected {
+  background: #0891b2 !important;
+  color: white !important;
+}
+
+.patient-calendar .rbc-off-range-bg {
+  background: #f8f9fa !important;
+  color: #ccc !important;
+}
+
+.patient-calendar .rbc-event {
+  border-radius: 4px !important;
+  padding: 1px 4px !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  margin: 1px !important;
+}
+
+.patient-calendar .rbc-event:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(8, 145, 178, 0.3) !important;
+}
+
+.patient-calendar .rbc-event-content {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+}
+
+/* 선택된 날짜 정보 */
+.selected-date-info {
+  text-align: center;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+/* 이벤트 다이얼로그 */
+.patient-event-dialog .MuiDialog-paper {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.event-dialog-header {
+  background: #0891b2 !important;
+  color: white !important;
+  padding: 1rem 1.5rem !important;
+}
+
+.event-item {
+  padding: 1rem !important;
+  border-radius: 8px !important;
+  margin-bottom: 0.5rem !important;
+  background: #f8f9fa !important;
+  border: 1px solid #e9ecef !important;
+}
+
+.event-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  margin-right: 1rem !important;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .patient-calendar-content {
+    padding: 1rem !important;
+  }
+  
+  .patient-calendar-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .toolbar-navigation {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .patient-calendar {
+    font-size: 0.8rem !important;
+  }
+  
+  .patient-calendar .rbc-header {
+    padding: 6px 2px !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .patient-calendar .rbc-date-cell {
+    padding: 4px !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .today-appointments {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* 스크롤바 스타일링 */
+.patient-calendar-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.patient-calendar-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.patient-calendar-container::-webkit-scrollbar-thumb {
+  background: #0891b2;
+  border-radius: 3px;
+}
+
+.patient-calendar-container::-webkit-scrollbar-thumb:hover {
+  background: #0e7490;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.patient-calendar-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.event-item {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* 호버 효과 */
+.patient-calendar .rbc-date-cell:hover {
+  background: #f0fdff !important;
+  cursor: pointer !important;
+}
+
+.appointment-chip:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}

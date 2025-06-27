@@ -1,0 +1,78 @@
+/* 전체 대시보드 컨테이너 */
+.dashboard-container {
+  background-color: #f0f4f8;         /* ✅ 더 밝고 깔끔한 배경 */
+  min-height: 100vh;
+  padding: 40px 24px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+}
+
+/* 대시보드 타이틀 */
+.dashboard-title {
+  font-size: 28px;
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 24px;
+  color: #1e293b; /* 딥 네이비 */
+}
+
+/* 그리드 카드 배치 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+/* 개별 카드 스타일 */
+.section-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease;
+}
+
+.section-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* 카드 제목 (AI 결과 등) */
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+/* 환자 정보 카드 버튼 등 */
+.patient-card button {
+  background-color: #4fc3f7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  margin-top: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.patient-card button:hover {
+  background-color: #03a9f4;
+}
+
+.main-button {
+  background-color: #0077b6;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.2s ease;
+}
+
+.main-button:hover {
+  background-color: #005f8c;
+}

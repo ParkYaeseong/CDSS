@@ -1,0 +1,491 @@
+/* final_react/src/styles/NursingLogDocument.css */
+
+/* 문서 전체 레이아웃 */
+.nursing-document-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  line-height: 1.6;
+  color: #333;
+  overflow-y: auto;
+}
+
+.document-page {
+  background: #f8f9fa;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.page-content {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* 툴바 스타일 */
+.document-toolbar {
+  background: #2c3e50;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.toolbar-left h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 10px;
+}
+
+.toolbar-right button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background: #28a745;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #218838;
+}
+
+.save-btn {
+  background: #007bff;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #0056b3;
+}
+
+.print-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.print-btn:hover {
+  background: #545b62;
+}
+
+.cancel-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #c82333;
+}
+
+.close-btn {
+  background: #495057;
+  color: white;
+}
+
+.close-btn:hover {
+  background: #343a40;
+}
+
+/* 문서 헤더 */
+.document-header {
+  text-align: center;
+  border-bottom: 3px solid #007bff;
+  padding-bottom: 30px;
+  margin-bottom: 30px;
+}
+
+.hospital-info h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #007bff;
+  font-weight: 700;
+}
+
+.hospital-info .subtitle {
+  margin: 5px 0 20px 0;
+  font-size: 16px;
+  color: #6c757d;
+}
+
+.document-title h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.document-title .document-type {
+  margin: 5px 0 20px 0;
+  font-size: 14px;
+  color: #6c757d;
+  letter-spacing: 1px;
+}
+
+.document-meta {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meta-item .label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.meta-item .value {
+  color: #007bff;
+  font-weight: 500;
+}
+
+/* 환자 정보 및 기록 정보 섹션 */
+.patient-section,
+.record-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #28a745;
+}
+
+.patient-section h3,
+.record-section h3 {
+  margin: 0 0 20px 0;
+  color: #28a745;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.patient-grid,
+.record-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.info-item .label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.info-item .value {
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+/* 배지 스타일 */
+.badge-container {
+  display: flex;
+  align-items: center;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ai-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.manual-badge {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.confidence-score {
+  background: #e8f5e8;
+  color: #2e7d32;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status.approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.pending_review {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* SOAP 섹션 - 간호기록 */
+.nursing-content {
+  margin-bottom: 30px;
+}
+
+.nursing-content h3 {
+  margin: 0 0 20px 0;
+  color: #007bff;
+  font-size: 20px;
+  font-weight: 600;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+
+.soap-container {
+  display: grid;
+  gap: 20px;
+}
+
+.soap-section {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.soap-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px 20px;
+}
+
+.soap-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.soap-icon {
+  font-size: 18px;
+}
+
+.soap-content {
+  padding: 20px;
+  background: white;
+}
+
+.content-text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #2c3e50;
+  white-space: pre-wrap;
+  min-height: 60px;
+}
+
+.edit-textarea {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: vertical;
+  font-family: inherit;
+  min-height: 100px;
+}
+
+.edit-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* 연속기록 타임라인 */
+.continuous-record {
+  margin-bottom: 30px;
+}
+
+.continuous-record h3 {
+  margin: 0 0 20px 0;
+  color: #17a2b8;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.record-timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.record-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #17a2b8;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #17a2b8;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -25px;
+  top: 15px;
+  width: 8px;
+  height: 8px;
+  background: #17a2b8;
+  border-radius: 50%;
+}
+
+.timeline-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #495057;
+}
+
+/* 서명 섹션 */
+.document-footer {
+  border-top: 2px solid #dee2e6;
+  padding-top: 30px;
+  margin-top: 40px;
+}
+
+.signature-section {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.signature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signature-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.signature-line {
+  border-bottom: 1px solid #333;
+  padding: 5px 20px;
+  min-width: 120px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.signature-date {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .page-content {
+    padding: 20px;
+    margin: 10px;
+  }
+  
+  .document-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .patient-grid,
+  .record-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .signature-section {
+    flex-direction: column;
+  }
+  
+  .toolbar-right {
+    flex-wrap: wrap;
+  }
+  
+  .hospital-info h1 {
+    font-size: 24px;
+  }
+  
+  .document-title h2 {
+    font-size: 20px;
+  }
+}
+
+/* 인쇄 스타일 */
+@media print {
+  .document-toolbar {
+    display: none;
+  }
+  
+  .nursing-document-fullscreen {
+    position: static;
+    background: white;
+  }
+  
+  .page-content {
+    box-shadow: none;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  .edit-textarea {
+    border: none;
+    background: transparent;
+  }
+  
+  .soap-section {
+    break-inside: avoid;
+  }
+  
+  .timeline-item {
+    break-inside: avoid;
+  }
+}
