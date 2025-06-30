@@ -13,7 +13,7 @@ import {
 const patientsWithClinicalData = {
   liver: ['강 경화'],
   stomach: ['이 선아'],
-  kidney: ['신 장훈', 'Park Yeaseng']
+  kidney: ['신 장훈', '박 예성']
 };
 
 const PatientSelector = ({ 
@@ -49,9 +49,9 @@ const PatientSelector = ({
 
   const getCancerTypeColor = (cancerType) => {
     const colors = {
-      liver: '#00897b',
-      kidney: '#ff8a65',
-      stomach: '#42a5f5'
+      liver: '#C77954',
+      kidney: '#8C6D9E',
+      stomach: '#6A8EAE'
     };
     return colors[cancerType] || '#00897b';
   };

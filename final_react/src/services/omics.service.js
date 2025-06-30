@@ -3,6 +3,24 @@
 import apiClient from './apiClient';
 import { ENDPOINTS } from './config';
 
+
+
+// [수정] 함수 이름과 URL을 백엔드와 일치시킵니다.
+const getOmicsRequests = (patientId) => {
+  return apiClient.get(`/api/patients/${patientId}/omics-requests/`);
+};
+
+// [수정] analysisId 대신 requestId를 사용하고 URL을 수정합니다.
+const getOmicsResult = (requestId) => {
+  // [최종 수정] 백엔드의 urls.py가 아는 정확한 경로로 수정합니다.
+  // 'omics-results'가 아닌 'results'입니다.
+  const correctUrl = `/api/omics/results/${requestId}/`;
+
+  console.log("최종 API 요청 주소:", correctUrl);
+
+  return apiClient.get(correctUrl);
+};
+
 // ===================================================================
 // 오믹스 분석 서비스 - 완전 통합 버전
 // ===================================================================
@@ -281,6 +299,11 @@ const OmicsService = {
     getAvailableCancerTypes,
     startAnalysis,
     getDebugInfo,
+
+    // 의사 목록에
+    getOmicsRequests,
+    getOmicsResult,
+
 };
 
 export default OmicsService;

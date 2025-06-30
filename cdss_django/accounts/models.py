@@ -9,6 +9,7 @@ class User(AbstractUser):
         ('doctor', '의사'),
         ('nurse', '간호사'),
         ('radio', '영상의학과'),
+        ('staff', '원무과'),
         ('admin', '관리자'),
     )
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='patient')
@@ -111,6 +112,8 @@ class MedicalStaff(models.Model):
         ('doctor', '의사'),
         ('nurse', '간호사'),
         ('admin', '관리자'),
+        ('staff', '원무과'),
+        ('radio', '영상의학과'),
     ]
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='medical_staff')

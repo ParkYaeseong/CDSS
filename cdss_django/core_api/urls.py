@@ -5,7 +5,7 @@ from .views import (
     UserStatusView,
     TestAPIView,
 )
-
+from omics.views import OmicsResultDetailView
 urlpatterns = [
         # ✅ accounts URL 연결 주석 해제
     path('accounts/', include('accounts.urls')),
@@ -34,6 +34,8 @@ urlpatterns = [
     # 기타
     path('auth/status/', UserStatusView.as_view(), name='user-status'),
     path('test/', TestAPIView.as_view(), name='test-api'),
+    path('omics-results/<uuid:request_id>/', OmicsResultDetailView.as_view(), name='core-api-omics-result-detail'),
+   
 ]
 
 # OpenEMR 관련 URL들을 조건부로 추가

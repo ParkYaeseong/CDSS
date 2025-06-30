@@ -226,11 +226,6 @@ export default function OmicsSinglePage() {
       width: '100%',
       maxWidth: 'none'
     }}>
-      {/* 헤더 */}
-      <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, color: '#495057', textAlign: 'center' }}>
-        🧬 오믹스 분석
-      </Typography>
-
       {error && (
         <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
           {error}
@@ -248,9 +243,8 @@ export default function OmicsSinglePage() {
       }}>
         <CardContent sx={{ bgcolor: '#f8f9fa', p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <PersonOutline sx={{ color: '#E0969F' }} />
-            <Typography variant="h6" fontWeight="600" sx={{ color: '#495057' }}>
-              환자 선택
+            <Typography variant="h5" fontWeight="600" sx={{ color: '#495057' }}>
+              오믹스 분석
             </Typography>
           </Box>
           

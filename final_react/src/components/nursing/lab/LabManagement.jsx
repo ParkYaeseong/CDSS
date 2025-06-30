@@ -1,49 +1,121 @@
-// final_react/src/components/nursing/lab/LabManagement.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Card, CardContent, Typography, FormControl, Select, MenuItem,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Button, CircularProgress, Chip, Modal, Paper, TextField
+  Button, CircularProgress, Chip, Modal, Paper, TextField, InputLabel,
+  Grid, Pagination, IconButton, Accordion, AccordionSummary, AccordionDetails,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert
 } from '@mui/material';
-import { Warning, HourglassEmpty, CheckCircle } from '@mui/icons-material';
+import { 
+  Search, ExpandMore, Visibility, Download, Share, Assessment,
+  Refresh, CloudDownload, LibraryBooks
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import PatientService from '../../../services/patient.service';
+import OmicsService from '../../../services/omics.service';
 
-export default function LabManagement({
-  labOrders, selectedStatus, setSelectedStatus, isOrderLoading,
-  selectedOrder, setSelectedOrder, setShowCollectionModal, setShowResultModal,
-  showCollectionModal, showResultModal, collectionNotes, setCollectionNotes,
-  resultForm, setResultForm, handleCollectSample, handleAddResult
-}) {
+export default function LabManagement() {
+  const navigate = useNavigate();
+  
+  // 환자 목록 상태
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [loadingPatients, setLoadingPatients] = useState(false);
+  
+  // 검색 상태
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [resultsPerPage] = useState(10);
+  
+  // 오믹스 분석 결과 상태
+  const [omicsResults, setOmicsResults] = useState([]);
+  const [loadingResults, setLoadingResults] = useState(false);
+  const [error, setError] = useState('');
 
-  const getStatusBadge = (status, priority) => {
-    let color = '#3b82f6';
-    let statusText = '';
-    
-    switch(status) {
-      case 'ordered': 
-        color = priority === 'stat' ? '#ef4444' : '#f59e0b';
-        statusText = '검체채취 대기'; 
-        break;
-      case 'collected': 
-        color = '#3b82f6';
-        statusText = '채취완료'; 
-        break;
-      case 'processing': 
-        color = '#6366f1';
-        statusText = '처리중'; 
-        break;
-      case 'completed': 
-        color = '#10b981';
-        statusText = '완료'; 
-        break;
-      default: 
-        statusText = status;
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  useEffect(() => {
+    if (selectedPatient?.id) {
+      fetchPatientOmicsResults(selectedPatient.id);
+    } else {
+      setOmicsResults([]);
     }
-    
+  }, [selectedPatient]);
+
+  const fetchPatients = async () => {
+    setLoadingPatients(true);
+    try {
+      const response = await PatientService.getAllPatients();
+      if (response.success && Array.isArray(response.data)) {
+        setPatients(response.data);
+      }
+    } catch (error) {
+      console.error('환자 목록 조회 실패:', error);
+      setError('환자 목록을 불러오는데 실패했습니다.');
+    } finally {
+      setLoadingPatients(false);
+    }
+  };
+
+  const fetchPatientOmicsResults = async (patientId) => {
+    setLoadingResults(true);
+    setError('');
+    try {
+      const analyses = await OmicsService.getPatientAnalyses(patientId);
+      
+      const completedAnalyses = analyses
+        .filter(analysis => analysis.status === 'COMPLETED')
+        .map((analysis, index) => ({
+          ...analysis,
+          analysis_number: `분석 #${index + 1}`,
+          analysis_id: analysis.id.slice(-6),
+          analysis_date: analysis.request_timestamp || new Date().toISOString()
+        }));
+      
+      setOmicsResults(completedAnalyses);
+    } catch (error) {
+      console.error('환자 오믹스 결과 조회 실패:', error);
+      setError(`${selectedPatient.name}님의 오믹스 분석 결과를 불러오는데 실패했습니다.`);
+    } finally {
+      setLoadingResults(false);
+    }
+  };
+
+  const handlePatientChange = (event) => {
+    const patientId = event.target.value;
+    const patient = patients.find(p => p.id === patientId);
+    setSelectedPatient(patient);
+    setCurrentPage(1);
+  };
+
+  // 상세 결과 페이지로 이동
+  const handleViewDetails = (analysisId) => {
+    navigate(`/omics/result/${analysisId}`);
+  };
+
+  // 결과 필터링
+  const filteredResults = omicsResults.filter(result => {
+    const matchesSearch = !searchTerm || 
+      result.analysis_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      new Date(result.analysis_date).toLocaleDateString('ko-KR').includes(searchTerm);
+    return matchesSearch;
+  });
+
+  const totalPages = Math.ceil(filteredResults.length / resultsPerPage);
+  const startIndex = (currentPage - 1) * resultsPerPage;
+  const paginatedResults = filteredResults.slice(startIndex, startIndex + resultsPerPage);
+
+  const getStatusChip = (status) => {
     return (
       <Chip 
-        label={statusText} 
+        label="완료"
         sx={{ 
-          bgcolor: color,
+          bgcolor: '#4caf50',
           color: 'white',
           fontWeight: '600',
           fontSize: '0.75rem'
@@ -53,294 +125,316 @@ export default function LabManagement({
     );
   };
 
-  const getPriorityIcon = (priority) => {
-    switch(priority) {
-      case 'stat': 
-        return <Warning sx={{ color: '#ef4444' }} titleAccess="STAT" />;
-      case 'urgent': 
-        return <HourglassEmpty sx={{ color: '#f59e0b' }} titleAccess="긴급" />;
-      default: 
-        return <CheckCircle sx={{ color: '#10b981' }} titleAccess="일반" />;
-    }
-  };
-
   return (
-    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3, bgcolor: '#f9fafb' }}>
-      <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, color: '#8B4A52' }}>
-        🔬 검사실 관리
-      </Typography>
-      
-      {/* 검사 주문 목록 */}
-      <Card sx={{ border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <Box sx={{ 
-          bgcolor: '#374151', 
-          color: 'white', 
-          p: 2.5,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
+    <Box sx={{ 
+      flexGrow: 1, 
+      display: 'flex', 
+      flexDirection: 'column', 
+      bgcolor: '#f8f9fa',
+      minHeight: '100vh',
+      overflow: 'auto'
+    }}>
+      <Box sx={{ p: 3, overflow: 'auto' }}>
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 3, 
+              borderRadius: 2,
+              borderLeft: '4px solid #E0969F'
+            }}
+          >
+            {error}
+          </Alert>
+        )}
+
+        {/* 검색 영역 */}
+        <Card sx={{ 
+          mb: 3,
+          borderRadius: 2,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          border: '1px solid #e0e0e0',
+          borderLeft: '4px solid #E0969F'
         }}>
-          <Typography variant="h6" fontWeight="600">
-            📝 검사 주문 목록
-          </Typography>
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <Select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-notchedOutline': { border: 'none' }
-              }}
-            >
-              <MenuItem value="ordered">주문됨</MenuItem>
-              <MenuItem value="collected">채취완료</MenuItem>
-              <MenuItem value="processing">처리중</MenuItem>
-              <MenuItem value="completed">완료</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        <CardContent sx={{ bgcolor: 'white', p: 0 }}>
-          {isOrderLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-              <CircularProgress sx={{ color: '#3b82f6' }} />
-            </Box>
-          ) : (
-            <TableContainer>
-              <Table>
-                <TableHead sx={{ bgcolor: '#f3f4f6' }}>
-                  <TableRow>
-                    <TableCell sx={{ color: '#374151', fontWeight: '600' }}>우선순위</TableCell>
-                    <TableCell sx={{ color: '#374151', fontWeight: '600' }}>환자명</TableCell>
-                    <TableCell sx={{ color: '#374151', fontWeight: '600' }}>검사명</TableCell>
-                    <TableCell sx={{ color: '#374151', fontWeight: '600' }}>상태</TableCell>
-                    <TableCell sx={{ color: '#374151', fontWeight: '600' }}>주문시간</TableCell>
-                    <TableCell sx={{ color: '#374151', fontWeight: '600' }}>작업</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {labOrders.length === 0 ? (
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h5" fontWeight="bold" sx={{ mb: 2, color: '#333' }}>
+              오믹스 결과 목록
+            </Typography>
+            <Grid container spacing={3} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="분석 번호, 날짜로 검색"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="분석 번호, 날짜로 검색"
+                  InputProps={{
+                    startAdornment: <Search sx={{ mr: 1, color: '#E0969F' }} />
+                  }}
+                  sx={{ 
+                    bgcolor: 'white',
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 1,
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#E0969F' },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#E0969F' }
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': { color: '#E0969F' }
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<Refresh />}
+                  onClick={() => selectedPatient && fetchPatientOmicsResults(selectedPatient.id)}
+                  disabled={loadingResults || !selectedPatient}
+                  sx={{ 
+                    height: '56px',
+                    borderColor: '#E0969F',
+                    color: '#E0969F',
+                    borderRadius: 1,
+                    '&:hover': { 
+                      borderColor: '#C8797F', 
+                      bgcolor: '#fce4ec',
+                      color: '#C8797F'
+                    }
+                  }}
+                >
+                  새로고침
+                </Button>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+
+        {/* 환자 선택 드롭다운 */}
+        <Card sx={{ 
+          mb: 3,
+          borderRadius: 2,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          border: '1px solid #e0e0e0',
+          borderLeft: '4px solid #E0969F'
+        }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, color: '#333' }}>
+              환자 선택
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2, color: '#666' }}>
+              {selectedPatient ? 
+                `${selectedPatient.name || selectedPatient.display_name}님이 선택되었습니다.` : 
+                '분석 결과를 확인할 환자를 선택해주세요.'
+              }
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel sx={{ 
+                color: '#6c757d',
+                '&.Mui-focused': { color: '#E0969F' }
+              }}>
+                환자 선택
+              </InputLabel>
+              <Select
+                value={selectedPatient?.id || ''}
+                onChange={handlePatientChange}
+                label="환자 선택"
+                disabled={loadingPatients}
+                sx={{ 
+                  bgcolor: 'white',
+                  borderRadius: 1,
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ced4da' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#E0969F' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#E0969F' }
+                }}
+              >
+                <MenuItem value="" disabled>
+                  <em>환자를 선택해주세요</em>
+                </MenuItem>
+                {patients.map((patient) => (
+                  <MenuItem key={patient.id} value={patient.id}>
+                    <Box>
+                      <Typography fontWeight="600" color="#333">
+                        {patient.name || patient.display_name || `${patient.first_name || ''} ${patient.last_name || ''}`.trim()}
+                      </Typography>
+                      <Typography variant="caption" color="#666">
+                        ID: {patient.openemr_id || patient.flutter_patient_id || patient.id}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </CardContent>
+        </Card>
+
+        {/* 결과 목록 테이블 */}
+        <Card sx={{ 
+          borderRadius: 2,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          border: '1px solid #e0e0e0',
+          borderLeft: '4px solid #E0969F'
+        }}>
+          <Box sx={{ 
+            bgcolor: 'white', 
+            color: '#E0969F', 
+            p: 2.5,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
+            borderBottom: '1px solid #e0e0e0'
+          }}>
+            <Typography variant="h6" fontWeight="600" sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#000'  }}>
+              오믹스 분석 결과 목록
+            </Typography>
+            <Typography variant="body2" color="#666">
+              총 {filteredResults.length}건의 결과
+            </Typography>
+          </Box>
+          
+          <CardContent sx={{ p: 0 }}>
+            {!selectedPatient ? (
+              <Box sx={{ textAlign: 'center', p: 6 }}>
+                <LibraryBooks sx={{ fontSize: 80, color: '#ccc', mb: 2 }} />
+                <Typography variant="h6" color="#666" sx={{ mb: 1 }}>
+                  환자를 선택해주세요
+                </Typography>
+                <Typography variant="body2" color="#999">
+                  위의 드롭다운에서 환자를 선택하시면 해당 환자의 오믹스 분석 결과를 확인할 수 있습니다.
+                </Typography>
+              </Box>
+            ) : loadingResults ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 6 }}>
+                <CircularProgress sx={{ color: '#E0969F', mr: 2 }} />
+                <Typography color="#666">오믹스 분석 결과를 불러오는 중...</Typography>
+              </Box>
+            ) : paginatedResults.length === 0 ? (
+              <Box sx={{ textAlign: 'center', p: 6 }}>
+                <LibraryBooks sx={{ fontSize: 80, color: '#ccc', mb: 2 }} />
+                <Typography variant="h6" color="#666" sx={{ mb: 1 }}>
+                  분석 결과가 없습니다
+                </Typography>
+                <Typography variant="body2" color="#999">
+                  {selectedPatient.name}님의 오믹스 분석 결과가 아직 없습니다.
+                </Typography>
+              </Box>
+            ) : (
+              <TableContainer sx={{ bgcolor: 'white' }}>
+                <Table>
+                  <TableHead sx={{ bgcolor: '#f8f9fa' }}>
                     <TableRow>
-                      <TableCell colSpan={6} sx={{ textAlign: 'center', p: 4 }}>
-                        <Typography color="#6b7280">
-                          해당 상태의 검사 주문이 없습니다.
-                        </Typography>
+                      <TableCell sx={{ 
+                        color: '#495057', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #dee2e6',
+                        py: 2
+                      }}>
+                        분석 번호
+                      </TableCell>
+                      <TableCell sx={{ 
+                        color: '#495057', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #dee2e6',
+                        py: 2
+                      }}>
+                        상태
+                      </TableCell>
+                      <TableCell sx={{ 
+                        color: '#495057', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #dee2e6',
+                        py: 2
+                      }}>
+                        생성일
+                      </TableCell>
+                      <TableCell sx={{ 
+                        color: '#495057', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #dee2e6',
+                        py: 2
+                      }}>
+                        작업
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    labOrders.map((order) => (
+                  </TableHead>
+                  <TableBody>
+                    {paginatedResults.map((result, index) => (
                       <TableRow 
-                        key={order.id}
-                        onClick={() => setSelectedOrder(order)}
+                        key={result.id}
                         sx={{ 
-                          cursor: 'pointer',
-                          bgcolor: selectedOrder?.id === order.id ? '#e0e7ff' : 'transparent',
-                          '&:hover': { bgcolor: '#f9fafb' }
+                          '&:hover': { bgcolor: '#f8f9fa' },
+                          borderLeft: '4px solid #E0969F'
                         }}
                       >
-                        <TableCell>{getPriorityIcon(order.priority)}</TableCell>
-                        <TableCell>
-                          <Typography fontWeight="600" color="#374151">
-                            {order.patient_name}
+                        <TableCell sx={{ py: 2 }}>
+                          <Typography fontWeight="600" color="#495057" fontSize="14px">
+                            {result.analysis_number}
+                          </Typography>
+                          <Typography variant="caption" color="#6c757d">
+                            ID: {result.analysis_id}
                           </Typography>
                         </TableCell>
-                        <TableCell>{order.test_name}</TableCell>
-                        <TableCell>{getStatusBadge(order.status, order.priority)}</TableCell>
-                        <TableCell>
-                          <Typography variant="caption" color="#6b7280">
-                            {new Date(order.ordered_at).toLocaleString('ko-KR')}
+                        <TableCell sx={{ py: 2 }}>
+                          {getStatusChip(result.status)}
+                        </TableCell>
+                        <TableCell sx={{ py: 2 }}>
+                          <Typography variant="body2" color="#6c757d" fontSize="13px">
+                            {new Date(result.analysis_date).toLocaleDateString('ko-KR')}
                           </Typography>
                         </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
-                            {order.status === 'ordered' && (
-                              <Button 
-                                size="small"
-                                variant="contained"
-                                onClick={(e) => { 
-                                  e.stopPropagation(); 
-                                  setSelectedOrder(order); 
-                                  setShowCollectionModal(true); 
-                                }}
-                                sx={{ 
-                                  bgcolor: '#f59e0b',
-                                  '&:hover': { bgcolor: '#d97706' }
-                                }}
-                              >
-                                채취
-                              </Button>
-                            )}
-                            {order.status === 'collected' && (
-                              <Button 
-                                size="small"
-                                variant="contained"
-                                onClick={(e) => { 
-                                  e.stopPropagation(); 
-                                  setSelectedOrder(order); 
-                                  setShowResultModal(true); 
-                                }}
-                                sx={{ 
-                                  bgcolor: '#10b981',
-                                  '&:hover': { bgcolor: '#059669' }
-                                }}
-                              >
-                                결과입력
-                              </Button>
-                            )}
-                          </Box>
+                        <TableCell sx={{ py: 2 }}>
+                          <Button 
+                            size="small" 
+                            variant="contained"
+                            onClick={() => handleViewDetails(result.id)}
+                            sx={{
+                              bgcolor: '#E0969F',
+                              color: 'white',
+                              fontSize: '12px',
+                              py: 0.5,
+                              px: 1.5,
+                              '&:hover': { 
+                                bgcolor: '#C8797F'
+                              }
+                            }}
+                          >
+                            📋 상세 결과
+                          </Button>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </CardContent>
-      </Card>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* 검체 채취 모달 */}
-      <Modal open={showCollectionModal} onClose={() => setShowCollectionModal(false)}>
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 450,
-          bgcolor: 'white',
-          border: '2px solid #E0969F',
-          borderRadius: 2,
-          boxShadow: 24,
-        }}>
-          <Box sx={{ bgcolor: '#E0969F', color: 'white', p: 2.5 }}>
-            <Typography variant="h6" fontWeight="600">
-              🧪 검체 채취
-            </Typography>
-          </Box>
-          <Box sx={{ p: 3 }}>
-            <Paper sx={{ p: 2, mb: 2, bgcolor: '#F5E6E8' }}>
-              <Typography variant="h6" color="#8B4A52">
-                환자: {selectedOrder?.patient_name}
-              </Typography>
-              <Typography color="#6b7280">
-                검사: {selectedOrder?.test_name}
-              </Typography>
-            </Paper>
-            <TextField
-              fullWidth
-              multiline
-              rows={3}
-              label="채취 관련 메모"
-              value={collectionNotes}
-              onChange={(e) => setCollectionNotes(e.target.value)}
+        {/* 페이지네이션 */}
+        {totalPages > 1 && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+            <Pagination 
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, page) => setCurrentPage(page)}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#E0969F' },
-                  '&:hover fieldset': { borderColor: '#C8797F' },
-                  '&.Mui-focused fieldset': { borderColor: '#E0969F' }
+                '& .MuiPaginationItem-root': {
+                  '&.Mui-selected': {
+                    bgcolor: '#E0969F',
+                    color: 'white'
+                  }
                 }
               }}
+              size="large"
             />
           </Box>
-          <Box sx={{ display: 'flex', gap: 1, p: 2.5, justifyContent: 'flex-end' }}>
-            <Button onClick={() => setShowCollectionModal(false)} sx={{ color: '#6b7280' }}>
-              취소
-            </Button>
-            <Button 
-              variant="contained" 
-              onClick={handleCollectSample}
-              sx={{ bgcolor: '#E0969F', '&:hover': { bgcolor: '#C8797F' } }}
-            >
-              채취 완료
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      {/* 결과 입력 모달 */}
-      <Modal open={showResultModal} onClose={() => setShowResultModal(false)}>
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 450,
-          bgcolor: 'white',
-          border: '2px solid #E0969F',
-          borderRadius: 2,
-          boxShadow: 24,
-        }}>
-          <Box sx={{ bgcolor: '#E0969F', color: 'white', p: 2.5 }}>
-            <Typography variant="h6" fontWeight="600">
-              📋 검사 결과 입력
-            </Typography>
-          </Box>
-          <Box sx={{ p: 3 }}>
-            <Paper sx={{ p: 2, mb: 2, bgcolor: '#F5E6E8' }}>
-              <Typography variant="h6" color="#8B4A52">
-                환자: {selectedOrder?.patient_name}
-              </Typography>
-              <Typography color="#6b7280">
-                검사: {selectedOrder?.test_name}
-              </Typography>
-            </Paper>
-            <TextField
-              fullWidth
-              label="검사 결과 값 *"
-              value={resultForm.result_value}
-              onChange={(e) => setResultForm({...resultForm, result_value: e.target.value})}
-              required
-              sx={{ 
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#E0969F' },
-                  '&:hover fieldset': { borderColor: '#C8797F' },
-                  '&.Mui-focused fieldset': { borderColor: '#E0969F' }
-                }
-              }}
-            />
-            <TextField
-              fullWidth
-              label="정상 범위"
-              value={resultForm.reference_range}
-              onChange={(e) => setResultForm({...resultForm, reference_range: e.target.value})}
-              sx={{ 
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#E0969F' },
-                  '&:hover fieldset': { borderColor: '#C8797F' },
-                  '&.Mui-focused fieldset': { borderColor: '#E0969F' }
-                }
-              }}
-            />
-            <TextField
-              fullWidth
-              label="단위"
-              value={resultForm.unit}
-              onChange={(e) => setResultForm({...resultForm, unit: e.target.value})}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#E0969F' },
-                  '&:hover fieldset': { borderColor: '#C8797F' },
-                  '&.Mui-focused fieldset': { borderColor: '#E0969F' }
-                }
-              }}
-            />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1, p: 2.5, justifyContent: 'flex-end' }}>
-            <Button onClick={() => setShowResultModal(false)} sx={{ color: '#6b7280' }}>
-              취소
-            </Button>
-            <Button 
-              variant="contained" 
-              onClick={handleAddResult}
-              disabled={!resultForm.result_value}
-              sx={{ bgcolor: '#E0969F', '&:hover': { bgcolor: '#C8797F' } }}
-            >
-              결과 저장
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
+        )}
+      </Box>
     </Box>
   );
 }

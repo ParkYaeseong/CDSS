@@ -20,7 +20,7 @@ function Navbar() {
         {/* 로고 영역 */}
         <div className="navbar-brand">
           <Link to="/" className="brand-link">
-            <span className="brand-text">CDSS</span>
+            <span className="brand-text">MEORING</span>
           </Link>
         </div>
 

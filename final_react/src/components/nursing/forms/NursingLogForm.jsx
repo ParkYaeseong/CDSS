@@ -185,15 +185,6 @@ function NursingLogForm({ selectedPatient, onSuccess, setLoading }) {
     }}>
       <Box sx={{ p: 3 }}>
         {/* 헤더 */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" fontWeight="bold" sx={{ color: '#374151', mb: 1 }}>
-            📝 간호일지 AI 자동완성
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            체크리스트를 선택하고 AI 자동완성을 실행하세요
-          </Typography>
-        </Box>
-
         <form onSubmit={handleSubmit}>
           {/* 환자 선택 섹션 - 하얀 박스 + 포인트 색 줄 */}
           <Box sx={{ 
@@ -205,16 +196,15 @@ function NursingLogForm({ selectedPatient, onSuccess, setLoading }) {
           }}>
             <Box sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Person sx={{ mr: 1, color: '#E0969F' }} />
-                <Typography variant="h6" fontWeight="600" sx={{ color: '#374151' }}>
-                  환자 정보
+                <Typography variant="h5" fontWeight="600" sx={{ color: '#374151' }}>
+                  간호일지 AI 자동완성
                 </Typography>
               </Box>
               
               {/* 환자 선택 */}
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, color: '#6b7280' }}>
-                  기존 환자 선택:
+                  환자 선택:
                 </Typography>
                 {patientsLoading ? (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

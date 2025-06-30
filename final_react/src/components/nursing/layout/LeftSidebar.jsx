@@ -17,8 +17,8 @@ export default function LeftSidebar({ selectedMenu, onMenuSelect }) {
     { id: 'wound-care', label: '상처 관리', icon: <Healing /> },
     { id: 'patient-education', label: '환자 교육', icon: <School /> },
     { id: 'calendar', label: '일정 관리', icon: <CalendarToday /> },
-    { id: 'lab-management', label: '검사실 관리', icon: <ScienceIcon /> },
-    { id: 'omics-analysis', label: '오믹스 분석', icon: <Biotech /> }
+    { id: 'omics-analysis', label: '오믹스 분석', icon: <Biotech /> },
+    { id: 'lab-management', label: '오믹스 결과 목록', icon: <ScienceIcon /> },
   ];
 
   return (

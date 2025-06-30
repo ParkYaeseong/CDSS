@@ -389,7 +389,7 @@ def get_flutter_patient_detail(request, patient_id):
     user = request.user
     
     # 의료진만 접근 가능
-    if user.user_type not in ['doctor', 'nurse', 'admin']:
+    if user.user_type not in ['doctor', 'nurse', 'admin','staff']:
         return Response({
             'success': False,
             'error': '권한이 없습니다.'

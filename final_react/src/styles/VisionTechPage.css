@@ -59,12 +59,23 @@ tbody tr:hover { background-color: #f1f3f5; }
 .tab-content .chart-wrapper h4 { text-align: left; }
 
 /* --- 애니메이션 --- */
-.page-header, .content-section { opacity: 0; animation: fadeUp 1.5s ease-out forwards; }
-.vision-container > *:nth-child(2) { animation-delay: 0.1s; }
-.vision-container > *:nth-child(3) { animation-delay: 0.2s; }
-.vision-container > *:nth-child(4) { animation-delay: 0.3s; }
-.vision-container > *:nth-child(5) { animation-delay: 0.4s; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.content-section {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* 자바스크립트가 is-visible 클래스를 추가하면, 섹션이 불투명해지고 제자리로 돌아옵니다. */
+.content-channel.is-visible,
+.content-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 페이지 최상단 헤더는 처음부터 보이도록 처리 */
+.page-header {
+  opacity: 1;
+}
 
 /* --- [신규 추가] 파이프라인 시각화 섹션 스타일 --- */
 .pipeline-steps-container {
@@ -269,3 +280,543 @@ tbody tr:hover { background-color: #f1f3f5; }
  font-weight: bold;
 }
 
+.unet-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.chart-wrapper-small {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.chart-title-small {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: #333;
+}
+
+.video-container {
+  max-width: 500px; /* 원하는 크기로 조절 (예: 700px) */
+  margin: 1rem auto 0 auto; /* 위쪽 마진은 유지하고, 좌우는 auto로 주어 중앙 정렬 */
+  border-radius: 8px;
+  overflow: hidden;
+  line-height: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* --- [신규] 그래프 애니메이션 스타일 --- */
+
+/* 1. 막대그래프 애니메이션 (진짜 최종 수정 버전) */
+@keyframes fillRightBar {
+  from {
+    /* 시작: 오른쪽에서 100% 지점에서 가림막 시작 (아무것도 안 보임) */
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    /* 종료: 가림막을 모두 걷어냄 (전체 보임) */
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* .is-visible 클래스가 붙은 섹션 내부의 막대그래프 바에 애니메이션 적용 */
+.content-section.is-visible .recharts-bar-rectangle,
+.content-section.is-visible .recharts-rectangle {
+  /* 이제 fillRightBar 애니메이션을 사용합니다 */
+  animation: fillRightBar 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+
+/* 2. 선 그래프 애니메이션 (이 부분은 그대로 둡니다) */
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* .is-visible 클래스가 붙은 섹션 내부의 선 그래프 라인에 애니메이션 적용 */
+.content-section.is-visible .recharts-line .recharts-curve {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawLine 2s ease-in-out forwards;
+}
+
+/* Clean Clinical Model Styles */
+
+.enhanced-chart-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin: 2rem 0;
+  border: 1px solid #e0e0e0;
+  transition: box-shadow 0.3s ease;
+}
+
+.enhanced-chart-wrapper:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header-clean {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.chart-title-clean {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.chart-subtitle-clean {
+  font-size: 0.9rem;
+  color: #718096;
+  font-weight: 400;
+}
+
+.chart-container-clean {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.performance-summary-table {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.summary-table th {
+  background-color: #f8f9fa;
+  padding: 0.8rem;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.summary-table td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #dee2e6;
+  color: #495057;
+}
+
+.summary-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Enhanced Comparison Chart */
+.enhanced-comparison-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin: 3rem 0;
+  border: 1px solid #e0e0e0;
+}
+
+.comparison-header-clean {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.comparison-title-clean {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.comparison-subtitle-clean {
+  font-size: 1rem;
+  color: #718096;
+  font-weight: 400;
+}
+
+.comparison-chart-container-clean {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #f0f0f0;
+  margin-bottom: 2rem;
+}
+
+.cancer-performance-table {
+  margin-top: 2rem;
+}
+
+.cancer-performance-table h5 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.performance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.performance-table th {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.performance-table td {
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #dee2e6;
+  color: #495057;
+  font-weight: 500;
+}
+
+.performance-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Clean Clinical Cards */
+.clean-clinical-overview {
+  margin: 3rem 0;
+}
+
+.overview-header-clean {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.overview-title-clean {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.overview-description-clean {
+  font-size: 1rem;
+  color: #718096;
+  font-weight: 400;
+}
+
+.clinical-cards-grid-clean {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.clean-clinical-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.clean-clinical-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-header-clean {
+  margin-bottom: 2.5rem; /* 2rem → 2.5rem */
+  padding-bottom: 1.5rem; /* 1rem → 1.5rem */
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.card-title-clean {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  text-align: center; /* 추가: 제목 가운데 정렬 */
+}
+
+.patient-stats-clean {
+  display: flex;
+  gap: 2rem;
+  font-size: 1.1rem;
+  color: #718096;
+  margin-bottom: 1.5rem;
+  justify-content: center; /* 추가: 가운데 정렬 */
+}
+
+.stat-item-clean {
+  background: #f8f9fa;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  border: 1px solid #e9ecef;
+  font-size: 1rem;
+  text-align: center; /* 추가: 텍스트 가운데 정렬 */
+}
+
+.metrics-table-clean {
+  margin-bottom: 2rem; /* 1.5rem → 2rem */
+}
+
+.metrics-table-clean table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.1rem; /* 0.9rem → 1.1rem */
+}
+
+.metrics-table-clean th {
+  background-color: #f8f9fa;
+  padding: 1.2rem;
+  text-align: center; /* left → center */
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  font-size: 1rem;
+}
+
+.metrics-table-clean td {
+  padding: 1.2rem;
+  border-bottom: 1px solid #dee2e6;
+  color: #495057;
+  font-size: 1rem;
+  text-align: center; /* 추가: 가운데 정렬 */
+}
+
+.metric-value-clean {
+  font-weight: 600;
+  color: #0077b6;
+  font-size: 1.1rem;
+  text-align: center; /* 추가: 가운데 정렬 */
+}
+
+.algorithm-name {
+  font-style: italic;
+  color: #6c757d;
+  font-size: 0.95rem;
+  text-align: center; /* 추가: 가운데 정렬 */
+}
+
+.card-footer-clean {
+  padding-top: 1.5rem; /* 1rem → 1.5rem */
+  border-top: 1px solid #e0e0e0;
+}
+
+.feature-list {
+  display: flex;
+  gap: 1rem; /* 0.5rem → 1rem */
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.feature-item {
+  background: #f8f9fa;
+  padding: 0.8rem 1.2rem; /* 0.4rem 0.8rem → 0.8rem 1.2rem */
+  border-radius: 8px; /* 6px → 8px */
+  font-size: 0.95rem; /* 0.8rem → 0.95rem */
+  font-weight: 500;
+  color: #495057;
+  border: 1px solid #e9ecef;
+}
+
+/* 로딩 상태 */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #6c757d;
+  font-size: 1rem;
+  font-weight: 500;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .clinical-cards-grid-clean {
+    grid-template-columns: 1fr;
+  }
+  
+  .patient-stats-clean {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .feature-list {
+    justify-content: flex-start;
+  }
+  
+  .enhanced-chart-wrapper,
+  .enhanced-comparison-wrapper {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-title-clean,
+  .comparison-title-clean {
+    font-size: 1.2rem;
+  }
+  
+  .overview-title-clean {
+    font-size: 1.5rem;
+  }
+  
+  .metrics-table-clean th,
+  .metrics-table-clean td {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* 추가 스타일 */
+.key-findings, .performance-issues {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #0077b6;
+}
+
+.key-findings h6, .performance-issues h6 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.key-findings ul, .performance-issues ul {
+  list-style: none;
+  padding: 0;
+}
+
+.key-findings li, .performance-issues li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+  color: #495057;
+}
+
+.key-findings li:last-child, .performance-issues li:last-child {
+  border-bottom: none;
+}
+
+.xai-analysis-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e0e0e0;
+}
+
+.xai-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.xai-item {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.xai-item h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.xai-item p {
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.xai-item ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+
+.xai-item li {
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.clinical-card-single {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.clinical-card-single .clean-clinical-card {
+  max-width: 800px; /* 600px → 800px */
+  width: 100%;
+  padding: 3rem; /* 2rem → 3rem */
+}
+
+.modern-tab-selector {
+  display: flex;
+  gap: 0.8rem;
+  margin: 2.5rem 0;
+  padding: 0.8rem;
+  background: rgba(0, 119, 182, 0.05);
+  border-radius: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 2rem;
+  border: none;
+  background: transparent;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #6c757d;
+  font-size: 1rem;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.tab-button:hover {
+  background: white;
+  color: #1d3557;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, #0077b6, #457b9d);
+  color: white;
+  box-shadow: 0 8px 25px rgba(0, 119, 182, 0.3);
+  font-weight: 600;
+}

@@ -199,8 +199,8 @@ class UserSearchView(APIView):
             
             users = []
             
-            # ✅ 의료진 검색 (의사, 간호사, 원무과 모두 포함)
-            if not user_type or user_type in ['doctor', 'nurse', 'admin', 'staff']:
+            # ✅ 의료진 검색 (의사, 간호사, 원무과, 영상의학과 모두 포함)
+            if not user_type or user_type in ['doctor', 'nurse', 'admin', 'staff', 'radio']:
                 medical_staff_qs = MedicalStaff.objects.select_related('user')
                 
                 # 특정 타입 필터링
@@ -216,18 +216,49 @@ class UserSearchView(APIView):
                         Q(department__icontains=search_term)
                     )
                 
+                print(f"[DEBUG] MedicalStaff 쿼리셋 개수: {medical_staff_qs.count()}")
+                
                 for staff in medical_staff_qs:
+                    print(f"[DEBUG] MedicalStaff: {staff.user.username}, staff_type: {staff.staff_type}, user_type: {staff.user.user_type}")
                     users.append({
                         'id': staff.user.id,  # User ID (메시지 전송용)
                         'medical_staff_id': staff.id,  # MedicalStaff ID (예약용)
                         'username': staff.user.username,
                         'name': staff.user.get_full_name() or staff.user.username,
-                        'user_type': staff.staff_type,  # doctor, nurse, admin, staff
+                        'user_type': staff.user.user_type,  # ← 수정: User 모델의 user_type 사용
+                        'staff_type': staff.staff_type,     # ← 추가: MedicalStaff의 staff_type도 포함
                         'email': staff.user.email or '',
                         'department': staff.department or '',
                         'specialization': staff.specialization or '',
-                        'staff_type': staff.staff_type,
                         'source': 'medical_staff'
+                    })
+            
+            # ✅ User 모델에서 직접 원무과 사용자 추가 검색 (fallback)
+            if not user_type or user_type == 'staff':
+                direct_staff_users = User.objects.filter(
+                    user_type='staff',
+                    is_active=True
+                ).exclude(id__in=[u['id'] for u in users])  # 중복 제거
+                
+                if search_term:
+                    direct_staff_users = direct_staff_users.filter(
+                        Q(username__icontains=search_term) |
+                        Q(first_name__icontains=search_term) |
+                        Q(last_name__icontains=search_term)
+                    )
+                
+                print(f"[DEBUG] 직접 User 모델에서 staff 사용자: {direct_staff_users.count()}명")
+                
+                for user in direct_staff_users:
+                    print(f"[DEBUG] 직접 User: {user.username}, user_type: {user.user_type}")
+                    users.append({
+                        'id': user.id,
+                        'username': user.username,
+                        'name': user.get_full_name() or user.username,
+                        'user_type': user.user_type,
+                        'email': user.email or '',
+                        'department': '원무과',
+                        'source': 'direct_user'
                     })
             
             # ✅ Flutter 환자 검색 (patient 타입일 때)
@@ -255,9 +286,9 @@ class UserSearchView(APIView):
                         'source': 'flutter_patient'
                     })
             
-            print(f"[DEBUG] 검색 결과: {len(users)}명")
+            print(f"[DEBUG] 최종 검색 결과: {len(users)}명")
             for user in users:
-                print(f"  - {user['name']} ({user['user_type']}) - ID: {user['id']}")
+                print(f"  - {user['name']} ({user['user_type']}) - ID: {user['id']} - Source: {user.get('source', 'unknown')}")
             
             return Response({
                 'success': True,
@@ -269,10 +300,13 @@ class UserSearchView(APIView):
             
         except Exception as e:
             print(f"[ERROR] 사용자 검색 오류: {e}")
+            import traceback
+            traceback.print_exc()
             return Response({
                 'success': False,
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # ✅ 함수 기반 뷰 (기존 호환성 유지)
 @api_view(['GET'])

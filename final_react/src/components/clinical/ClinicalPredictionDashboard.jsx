@@ -81,7 +81,7 @@ const ClinicalPredictionDashboard = ({ selectedPatient: dashboardSelectedPatient
   const patientsWithClinicalData = {
     liver: ['강 경화'],
     stomach: ['이 선아'],
-    kidney: ['신 장훈', 'Park Yeaseng']
+    kidney: ['신 장훈', '박 예성']
   };
 
   // 대시보드에서 선택한 환자가 변경될 때마다 자동으로 설정

@@ -1,11 +1,11 @@
-// src/components/Appointments/AppointmentManagementTable.jsx
+//src/components/Appointments/AppointmentManagementTable.jsx
+
 import React, { useState, useEffect } from 'react';
 import {
-  Card, CardContent, Typography, Button, Dialog, DialogTitle, 
-  DialogContent, TextField, FormControl, InputLabel, Select, MenuItem,
+  Box, Typography, Button, TextField, InputAdornment, 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, IconButton, Grid, Box, Paper, Avatar,
-  Tooltip, Pagination, InputAdornment
+  Paper, Chip, Modal, IconButton, Stack, Pagination,
+  FormControl, Select, MenuItem, InputLabel, Tooltip, Dialog, DialogTitle, DialogContent, Grid
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -14,12 +14,24 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon
+  Cancel as CancelIcon,
+  Visibility, MoreVert, Schedule, CalendarToday
 } from '@mui/icons-material';
 import moment from 'moment';
 import { appointmentService } from '../../services/appointment.service';
 import PatientService from '../../services/patient.service';
-import './AppointmentManagement.css';
+
+const THEME_COLORS = {
+  primary: '#003d82',
+  secondary: '#0066cc',
+  background: '#f8f9fa',
+  surface: '#ffffff',
+  border: '#dee2e6',
+  text: {
+    primary: '#212529',
+    secondary: '#6c757d'
+  }
+};
 
 export default function AppointmentManagementTable() {
   const [appointments, setAppointments] = useState([]);
@@ -30,10 +42,14 @@ export default function AppointmentManagementTable() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  
+  // 페이징 상태 (간호일지와 동일)
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortBy, setSortBy] = useState('appointment_datetime');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   const [appointmentForm, setAppointmentForm] = useState({
     patient_id: '',
@@ -49,6 +65,15 @@ export default function AppointmentManagementTable() {
     status: 'pending'
   });
 
+  const statusTypes = [
+    { value: '', label: '전체' },
+    { value: 'pending', label: '대기중' },
+    { value: 'confirmed', label: '확정' },
+    { value: 'in_progress', label: '진료중' },
+    { value: 'completed', label: '완료' },
+    { value: 'cancelled', label: '취소' }
+  ];
+
   useEffect(() => {
     fetchAppointments();
     fetchPatients();
@@ -59,6 +84,7 @@ export default function AppointmentManagementTable() {
     filterAppointments();
   }, [appointments, searchTerm, statusFilter, dateFilter]);
 
+  // ... 기존 함수들 유지 ...
   const fetchAppointments = async () => {
     try {
       setLoading(true);
@@ -76,15 +102,8 @@ export default function AppointmentManagementTable() {
   const fetchPatients = async () => {
     try {
       const response = await PatientService.getAllPatients();
-      console.log('환자 목록 조회 응답:', response); // 디버깅
       if (response.success) {
         setPatients(response.data);
-        // 환자 ID 형태 확인
-        if (response.data && response.data.length > 0) {
-          console.log('첫 번째 환자 ID:', response.data[0].id);
-          console.log('ID 타입:', typeof response.data[0].id);
-          console.log('ID 길이:', response.data[0].id.length);
-        }
       }
     } catch (error) {
       console.error('환자 목록 조회 실패:', error);
@@ -102,6 +121,7 @@ export default function AppointmentManagementTable() {
     }
   };
 
+  // 필터링 및 정렬 로직 (간호일지와 동일)
   const filterAppointments = () => {
     let filtered = [...appointments];
 
@@ -114,11 +134,11 @@ export default function AppointmentManagementTable() {
       );
     }
 
-    if (statusFilter !== 'all') {
+    if (statusFilter) {
       filtered = filtered.filter(apt => apt.status === statusFilter);
     }
 
-    if (dateFilter !== 'all') {
+    if (dateFilter) {
       const today = moment();
       switch (dateFilter) {
         case 'today':
@@ -139,13 +159,31 @@ export default function AppointmentManagementTable() {
       }
     }
 
+    // 정렬 적용
+    filtered = filtered.sort((a, b) => {
+      const aValue = a[sortBy];
+      const bValue = b[sortBy];
+      
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
     setFilteredAppointments(filtered);
-    setCurrentPage(1);
+    setPage(1);
   };
+
+  // 페이징 계산 (간호일지와 동일)
+  const totalPages = Math.ceil(filteredAppointments.length / rowsPerPage);
+  const paginatedAppointments = filteredAppointments.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
 
   const handleCreateAppointment = async () => {
     try {
-      // 필수 필드 검증
       if (!appointmentForm.patient_id || !appointmentForm.doctor_id || 
           !appointmentForm.appointment_date || !appointmentForm.appointment_time) {
         alert('필수 필드를 모두 입력해주세요.');
@@ -154,9 +192,8 @@ export default function AppointmentManagementTable() {
 
       const appointmentDateTime = new Date(`${appointmentForm.appointment_date}T${appointmentForm.appointment_time}`);
       
-      // ✅ 환자 ID를 문자열 그대로 전송 (parseInt 제거)
       const appointmentData = {
-        patient: appointmentForm.patient_id,  // ✅ 문자열 그대로 전송
+        patient: appointmentForm.patient_id,
         doctor: parseInt(appointmentForm.doctor_id),
         appointment_datetime: appointmentDateTime.toISOString(),
         duration: parseInt(appointmentForm.duration) || 30,
@@ -168,10 +205,6 @@ export default function AppointmentManagementTable() {
         status: appointmentForm.status || 'pending'
       };
 
-      console.log('전송할 예약 데이터:', appointmentData);
-      console.log('환자 ID 타입:', typeof appointmentData.patient);
-      console.log('환자 ID 길이:', appointmentData.patient.length);
-
       const response = await appointmentService.createAppointment(appointmentData);
       if (response.success) {
         await fetchAppointments();
@@ -181,7 +214,6 @@ export default function AppointmentManagementTable() {
         alert('예약이 성공적으로 생성되었습니다.');
       } else {
         console.error('예약 생성 실패:', response);
-        // ✅ 더 상세한 오류 정보 표시
         if (response.details) {
           alert(`예약 생성 실패: ${JSON.stringify(response.details)}`);
         } else {
@@ -199,7 +231,7 @@ export default function AppointmentManagementTable() {
       const appointmentDateTime = new Date(`${appointmentForm.appointment_date}T${appointmentForm.appointment_time}`);
       
       const appointmentData = {
-        patient: appointmentForm.patient_id,  // ✅ 수정 시에도 문자열 그대로
+        patient: appointmentForm.patient_id,
         doctor: parseInt(appointmentForm.doctor_id),
         appointment_datetime: appointmentDateTime.toISOString(),
         duration: parseInt(appointmentForm.duration) || 30,
@@ -277,10 +309,21 @@ export default function AppointmentManagementTable() {
     const appointmentDate = new Date(appointment.appointment_datetime);
     setAppointmentForm({
       ...appointment,
+      patient_id: appointment.patient_id || appointment.patient,
+      doctor_id: appointment.doctor_id || appointment.doctor,
       appointment_date: appointmentDate.toISOString().split('T')[0],
       appointment_time: appointmentDate.toTimeString().slice(0, 5)
     });
     setOpenDialog(true);
+  };
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('desc');
+    }
   };
 
   const getStatusColor = (status) => {
@@ -316,254 +359,408 @@ export default function AppointmentManagementTable() {
     }
   };
 
-  const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentAppointments = filteredAppointments.slice(startIndex, startIndex + itemsPerPage);
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+      <Typography>예약 목록을 불러오는 중...</Typography>
+    </Box>
+  );
 
   return (
-    <Box className="appointment-management-container">
-      {/* 헤더 */}
-      <Box className="management-header">
-        <Box>
-          <Typography variant="h4" className="management-title">
-            📋 예약 관리 시스템
-          </Typography>
-          <Typography variant="subtitle1" color="textSecondary">
-            모든 예약을 효율적으로 관리하세요
-          </Typography>
-        </Box>
-        <Box className="header-actions">
-          <Tooltip title="새로고침">
-            <IconButton onClick={fetchAppointments} disabled={loading} className="refresh-btn">
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
-          <Button 
-            variant="contained" 
-            startIcon={<AddIcon />} 
-            onClick={() => {
-              resetForm();
-              setOpenDialog(true);
-            }}
-            className="add-btn"
-          >
-            새 예약 등록
-          </Button>
+    <Box sx={{ p: 3, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
+      {/* 헤더 섹션 - 간호일지와 동일한 스타일 */}
+      <Box sx={{ 
+        bgcolor: 'white',
+        borderRadius: 1,
+        border: '1px solid #e5e7eb',
+        borderLeft: '4px solid #003d82', // 남색 포인트
+        mb: 3
+      }}>
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            mb: 3 
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="h5" fontWeight="bold" sx={{ mr: 2, color: '#374151' }}>
+                예약 관리 게시판
+              </Typography>
+              <Typography variant="h6" color="#003d82" fontWeight="600">
+                {filteredAppointments.length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
+                개의 예약
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  resetForm();
+                  setOpenDialog(true);
+                }}
+                sx={{ 
+                  bgcolor: '#003d82',
+                  '&:hover': { bgcolor: '#0066cc' }
+                }}
+              >
+                새 예약 등록
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={fetchAppointments}
+                sx={{ 
+                  color: '#003d82',
+                  borderColor: '#003d82',
+                  '&:hover': {
+                    borderColor: '#0066cc',
+                    bgcolor: '#f9fafb'
+                  }
+                }}
+              >
+                새로고침
+              </Button>
+            </Box>
+          </Box>
+
+          {/* 검색 및 필터 섹션 - 간호일지와 동일한 스타일 */}
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            alignItems: 'center',
+            mb: 2
+          }}>
+            <TextField
+              placeholder="환자명, 의사명, 진료과, 사유 검색..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: '#9ca3af' }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ 
+                flex: 1,
+                '& .MuiOutlinedInput-root': {
+                  bgcolor: '#f9fafb',
+                  '& fieldset': { borderColor: '#e5e7eb' },
+                  '&:hover fieldset': { borderColor: '#003d82' },
+                  '&.Mui-focused fieldset': { borderColor: '#003d82' }
+                }
+              }}
+            />
+            
+            <FormControl sx={{ minWidth: 140 }}>
+              <InputLabel>상태</InputLabel>
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                label="상태"
+                sx={{
+                  bgcolor: '#f9fafb',
+                  '& fieldset': { borderColor: '#e5e7eb' },
+                  '&:hover fieldset': { borderColor: '#003d82' },
+                  '&.Mui-focused fieldset': { borderColor: '#003d82' }
+                }}
+              >
+                {statusTypes.map(type => (
+                  <MenuItem key={type.value} value={type.value}>
+                    {type.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl sx={{ minWidth: 120 }}>
+              <InputLabel>기간</InputLabel>
+              <Select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                label="기간"
+                sx={{
+                  bgcolor: '#f9fafb',
+                  '& fieldset': { borderColor: '#e5e7eb' },
+                  '&:hover fieldset': { borderColor: '#003d82' },
+                  '&.Mui-focused fieldset': { borderColor: '#003d82' }
+                }}
+              >
+                <MenuItem value="">전체</MenuItem>
+                <MenuItem value="today">오늘</MenuItem>
+                <MenuItem value="week">이번 주</MenuItem>
+                <MenuItem value="month">이번 달</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl sx={{ minWidth: 120 }}>
+              <InputLabel>표시 개수</InputLabel>
+              <Select
+                value={rowsPerPage}
+                onChange={(e) => setRowsPerPage(e.target.value)}
+                label="표시 개수"
+                sx={{
+                  bgcolor: '#f9fafb',
+                  '& fieldset': { borderColor: '#e5e7eb' },
+                  '&:hover fieldset': { borderColor: '#003d82' },
+                  '&.Mui-focused fieldset': { borderColor: '#003d82' }
+                }}
+              >
+                <MenuItem value={5}>5개</MenuItem>
+                <MenuItem value={10}>10개</MenuItem>
+                <MenuItem value={20}>20개</MenuItem>
+                <MenuItem value={50}>50개</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
         </Box>
       </Box>
 
-      {/* 필터 섹션 */}
-      <Card className="filter-card">
-        <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                placeholder="환자명, 의사명, 진료과로 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={2}>
-              <FormControl fullWidth>
-                <InputLabel>상태</InputLabel>
-                <Select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <MenuItem value="all">전체</MenuItem>
-                  <MenuItem value="pending">대기중</MenuItem>
-                  <MenuItem value="confirmed">확정</MenuItem>
-                  <MenuItem value="in_progress">진료중</MenuItem>
-                  <MenuItem value="completed">완료</MenuItem>
-                  <MenuItem value="cancelled">취소</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={2}>
-              <FormControl fullWidth>
-                <InputLabel>기간</InputLabel>
-                <Select
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                >
-                  <MenuItem value="all">전체</MenuItem>
-                  <MenuItem value="today">오늘</MenuItem>
-                  <MenuItem value="week">이번 주</MenuItem>
-                  <MenuItem value="month">이번 달</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Box display="flex" justifyContent="flex-end" gap={1}>
-                <Chip 
-                  label={`총 ${filteredAppointments.length}건`} 
-                  color="primary" 
-                  variant="outlined"
-                />
-                <Chip 
-                  label={`대기중 ${filteredAppointments.filter(a => a.status === 'pending').length}건`} 
-                  style={{ backgroundColor: '#ff9800', color: 'white' }}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* 예약 테이블 */}
-      <Card className="table-card">
-        <TableContainer>
-          <Table>
+      {/* 게시판 테이블 섹션 - 간호일지와 동일한 스타일 */}
+      <Box sx={{ 
+        bgcolor: 'white',
+        borderRadius: 1,
+        border: '1px solid #e5e7eb',
+        borderLeft: '4px solid #003d82'
+      }}>
+        <TableContainer component={Paper} elevation={0}>
+          <Table sx={{ minWidth: 650 }}>
             <TableHead>
-              <TableRow>
-                <TableCell>환자</TableCell>
-                <TableCell>담당의</TableCell>
-                <TableCell>예약일시</TableCell>
-                <TableCell>진료과</TableCell>
-                <TableCell>유형</TableCell>
-                <TableCell>상태</TableCell>
-                <TableCell>진료사유</TableCell>
-                <TableCell align="center">관리</TableCell>
+              <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151', width: '60px' }}>
+                  번호
+                </TableCell>
+                <TableCell 
+                  sx={{ fontWeight: 'bold', color: '#374151', cursor: 'pointer' }}
+                  onClick={() => handleSort('status')}
+                >
+                  상태
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>
+                  환자 정보
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>
+                  담당의
+                </TableCell>
+                <TableCell 
+                  sx={{ fontWeight: 'bold', color: '#374151', cursor: 'pointer' }}
+                  onClick={() => handleSort('appointment_datetime')}
+                >
+                  예약일시
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>
+                  진료과/유형
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>
+                  진료사유
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151', width: '120px' }}>
+                  관리
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentAppointments.map((appointment) => (
-                <TableRow key={appointment.id} className="appointment-row">
-                  <TableCell>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Avatar className="patient-avatar">
-                        {appointment.patient_name?.charAt(0) || '?'}
-                      </Avatar>
+              {paginatedAppointments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} sx={{ textAlign: 'center', py: 8 }}>
+                    <CalendarToday sx={{ fontSize: 60, color: '#003d82', mb: 2 }} />
+                    <Typography variant="h6" sx={{ color: '#374151', mb: 1 }}>
+                      예약이 없습니다
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      새로운 예약을 등록해보세요!
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedAppointments.map((appointment, index) => (
+                  <TableRow 
+                    key={appointment.id}
+                    sx={{ 
+                      '&:hover': { bgcolor: '#f8f9fa' },
+                      borderBottom: '1px solid #e5e7eb'
+                    }}
+                  >
+                    <TableCell sx={{ color: '#6b7280' }}>
+                      {(page - 1) * rowsPerPage + index + 1}
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Chip 
+                        label={getStatusText(appointment.status)}
+                        size="small"
+                        sx={{ 
+                          bgcolor: getStatusColor(appointment.status),
+                          color: 'white',
+                          fontWeight: 600
+                        }}
+                        icon={appointment.status === 'completed' ? <CheckCircleIcon /> : <Schedule />}
+                      />
+                    </TableCell>
+                    
+                    <TableCell>
                       <Box>
-                        <Typography variant="subtitle2" fontWeight="bold">
+                        <Typography variant="body2" fontWeight="500" sx={{ color: '#374151' }}>
                           {appointment.patient_name || 'Unknown'}
                         </Typography>
-                        <Typography variant="caption" color="textSecondary">
+                        <Typography variant="caption" color="text.secondary">
                           ID: {appointment.patient_id || 'N/A'}
                         </Typography>
                       </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {appointment.doctor_name || 'Unknown'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Box>
-                      <Typography variant="body2" fontWeight="bold">
-                        {moment(appointment.appointment_datetime).format('MM월 DD일')}
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: '#374151' }}>
+                        {appointment.doctor_name || 'Unknown'}
                       </Typography>
-                      <Typography variant="caption" color="textSecondary">
-                        {moment(appointment.appointment_datetime).format('HH:mm')} ({appointment.duration}분)
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Box>
+                        <Typography variant="body2" fontWeight="500" sx={{ color: '#374151' }}>
+                          {moment(appointment.appointment_datetime).format('MM월 DD일')}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {moment(appointment.appointment_datetime).format('HH:mm')} ({appointment.duration}분)
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Chip 
+                          label={appointment.department || 'N/A'}
+                          size="small"
+                          sx={{ 
+                            bgcolor: '#f3f4f6',
+                            color: '#374151',
+                            fontSize: '0.75rem'
+                          }}
+                        />
+                        <Chip 
+                          label={getAppointmentTypeText(appointment.appointment_type)}
+                          size="small"
+                          sx={{ 
+                            bgcolor: '#e8f5e8',
+                            color: '#2e7d32',
+                            fontSize: '0.75rem'
+                          }}
+                        />
+                      </Box>
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: '#374151' }}>
+                        {appointment.reason || appointment.chief_complaint || '-'}
                       </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={appointment.department || 'N/A'} 
-                      size="small" 
-                      variant="outlined"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {getAppointmentTypeText(appointment.appointment_type)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={getStatusText(appointment.status)}
-                      size="small"
-                      style={{ 
-                        backgroundColor: getStatusColor(appointment.status),
-                        color: 'white'
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" className="reason-text">
-                      {appointment.reason || appointment.chief_complaint || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box display="flex" gap={0.5} justifyContent="center">
-                      {appointment.status === 'pending' && (
-                        <>
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Stack direction="row" spacing={0.5}>
+                        <Tooltip title="상세 보기">
+                          <IconButton 
+                            size="small"
+                            sx={{ 
+                              color: '#003d82',
+                              '&:hover': { bgcolor: '#f3f4f6' }
+                            }}
+                          >
+                            <Visibility fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        
+                        {appointment.status === 'pending' && (
                           <Tooltip title="승인">
                             <IconButton 
-                              size="small" 
-                              color="success"
+                              size="small"
                               onClick={() => handleStatusUpdate(appointment.id, 'confirmed')}
+                              sx={{ 
+                                color: '#059669',
+                                '&:hover': { bgcolor: '#f3f4f6' }
+                              }}
                             >
-                              <CheckCircleIcon />
+                              <CheckCircleIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="취소">
-                            <IconButton 
-                              size="small" 
-                              color="error"
-                              onClick={() => handleStatusUpdate(appointment.id, 'cancelled')}
-                            >
-                              <CancelIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </>
-                      )}
-                      <Tooltip title="수정">
-                        <IconButton 
-                          size="small" 
-                          color="primary"
-                          onClick={() => handleEditAppointment(appointment)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="삭제">
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                          onClick={() => handleDeleteAppointment(appointment.id)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {currentAppointments.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} align="center" style={{ padding: '2rem' }}>
-                    <Typography color="textSecondary">
-                      {loading ? '로딩 중...' : '예약이 없습니다.'}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+                        )}
+                        
+                        <Tooltip title="수정">
+                          <IconButton 
+                            size="small"
+                            onClick={() => handleEditAppointment(appointment)}
+                            sx={{ 
+                              color: '#003d82',
+                              '&:hover': { bgcolor: '#f3f4f6' }
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        
+                        <Tooltip title="더보기">
+                          <IconButton 
+                            size="small"
+                            sx={{ 
+                              color: '#6b7280',
+                              '&:hover': { bgcolor: '#f3f4f6' }
+                            }}
+                          >
+                            <MoreVert fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>
         </TableContainer>
 
-        {totalPages > 1 && (
-          <Box display="flex" justifyContent="center" p={2}>
+        {/* 페이징 섹션 - 간호일지와 동일한 스타일 */}
+        {filteredAppointments.length > 0 && (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            p: 2,
+            borderTop: '1px solid #e5e7eb'
+          }}>
+            <Typography variant="body2" color="text.secondary">
+              총 {filteredAppointments.length}개 중 {(page - 1) * rowsPerPage + 1}-{Math.min(page * rowsPerPage, filteredAppointments.length)}개 표시
+            </Typography>
+            
             <Pagination 
               count={totalPages}
-              page={currentPage}
-              onChange={(e, page) => setCurrentPage(page)}
+              page={page}
+              onChange={(event, value) => setPage(value)}
               color="primary"
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  '&.Mui-selected': {
+                    bgcolor: '#003d82',
+                    '&:hover': { bgcolor: '#0066cc' }
+                  }
+                }
+              }}
             />
           </Box>
         )}
-      </Card>
+      </Box>
 
       {/* 예약 생성/수정 다이얼로그 */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
@@ -573,14 +770,11 @@ export default function AppointmentManagementTable() {
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
+              <FormControl sx={{ overflow:'visible', width: '120px', margin: '0 auto' }}>
                 <InputLabel>환자 선택</InputLabel>
                 <Select
                   value={appointmentForm.patient_id}
                   onChange={(e) => {
-                    console.log('선택된 환자 전체 ID:', e.target.value); // 디버깅
-                    console.log('환자 ID 길이:', e.target.value.length); // UUID는 36자
-                    console.log('환자 ID 타입:', typeof e.target.value);
                     setAppointmentForm(prev => ({
                       ...prev,
                       patient_id: e.target.value
@@ -591,7 +785,6 @@ export default function AppointmentManagementTable() {
                     <MenuItem key={patient.id} value={patient.id}>
                       {patient.display_name || patient.name} 
                       ({patient.openemr_id || patient.flutter_patient_id})
-                      <span style={{fontSize: '0.8em', color: 'gray'}}> [{patient.id}]</span>
                     </MenuItem>
                   ))}
                 </Select>
@@ -599,14 +792,11 @@ export default function AppointmentManagementTable() {
             </Grid>
             
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
+              <FormControl sx={{ overflow:'visible', width: '120px', margin: '0 auto' }}>
                 <InputLabel>담당 의사</InputLabel>
                 <Select
                   value={appointmentForm.doctor_id}
                   onChange={(e) => {
-                    console.log('선택된 의사 ID:', e.target.value); // 디버깅
-                    const selectedDoctor = doctors.find(d => d.id === parseInt(e.target.value));
-                    console.log('선택된 의사 정보:', selectedDoctor); // 디버깅
                     setAppointmentForm(prev => ({
                       ...prev,
                       doctor_id: e.target.value
@@ -616,7 +806,6 @@ export default function AppointmentManagementTable() {
                   {doctors.map((doctor) => (
                     <MenuItem key={doctor.id} value={doctor.id}>
                       {doctor.name.replace(/\s*의사$/, '')} ({doctor.department || '내과'})
-                      <span style={{fontSize: '0.8em', color: 'gray'}}> [ID: {doctor.id}]</span>
                     </MenuItem>
                   ))}
                 </Select>
@@ -759,6 +948,7 @@ export default function AppointmentManagementTable() {
             onClick={selectedAppointment ? handleUpdateAppointment : handleCreateAppointment}
             variant="contained"
             disabled={!appointmentForm.patient_id || !appointmentForm.doctor_id}
+            sx={{ bgcolor: THEME_COLORS.primary }}
           >
             {selectedAppointment ? '수정' : '생성'}
           </Button>

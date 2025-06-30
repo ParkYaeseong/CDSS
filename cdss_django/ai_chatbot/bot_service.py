@@ -110,3 +110,39 @@ def get_gemini_chat_response(user_session_key, user_message):
         elif "permission" in str(e).lower() or "denied" in str(e).lower():
             error_message = "Gemini API 접근 권한에 문제가 있습니다. 관리자에게 문의해주세요."
         return error_message
+
+def generate_text_from_prompt(prompt_text):
+    """
+    하나의 프롬프트를 받아 Gemini 모델로부터 텍스트 응답을 생성합니다.
+    대화 기록을 사용하지 않는 단발성 요청에 사용됩니다 (예: 보고서 생성).
+    """
+    if not GEMINI_API_KEY_VALID or not chat_model:
+        print("🚫 (Report Gen) Gemini API가 설정되지 않아 텍스트 생성을 사용할 수 없습니다.")
+        return "오류: AI 서비스가 현재 API 키 문제로 사용 불가능합니다."
+
+    try:
+        print(f"📄 새로운 텍스트 생성 요청 수신...")
+        
+        # 대화형이 아닌 단일 요청에는 generate_content를 사용하는 것이 더 적합합니다.
+        response = chat_model.generate_content(prompt_text)
+        
+        generated_text = ""
+        # 성공적인 응답 처리
+        if response.parts:
+            generated_text = "".join(part.text for part in response.parts if hasattr(part, 'text')).strip()
+        # 안전 문제로 차단된 경우 처리
+        elif response.prompt_feedback and response.prompt_feedback.block_reason:
+            block_reason = response.prompt_feedback.block_reason
+            generated_text = f"오류: 요청이 안전 문제로 차단되었습니다 (이유: {block_reason})."
+            print(f"⚠️ (Report Gen) Gemini 요청 차단됨: {block_reason}")
+        # 그 외의 이유로 응답이 없는 경우
+        else:
+            generated_text = "오류: AI로부터 비어있는 응답을 받았습니다."
+            print(f"⚠️ (Report Gen) Gemini로부터 비어있는 응답")
+
+        return generated_text
+
+    except Exception as e:
+        print(f"🔴 (Report Gen) Gemini API로 텍스트 생성 중 심각한 오류 발생: {e}")
+        error_message = "오류: AI와 통신 중 오류가 발생했습니다."
+        return error_message

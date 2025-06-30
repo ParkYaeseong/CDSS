@@ -10,8 +10,7 @@ import {
   Card,
   CardContent,
   Paper,
-  Tabs,
-  Tab,
+  // Tabs와 Tab은 더 이상 필요 없으므로 삭제 가능
   Table,
   TableBody,
   TableCell,
@@ -52,216 +51,87 @@ const GaugeBar = ({ value, label, maxValue = 100, color = '#00897b' }) => {
   );
 };
 
-// XAI 설명 컴포넌트
+// XAI 설명 컴포넌트 (수정됨: SHAP만 표시)
 const XAIExplanation = ({ xaiData, themeColors, predictionType }) => {
-  const [activeTab, setActiveTab] = useState(0);
-  
   // 생존율 예측 모델에서는 XAI를 표시하지 않음
   if (predictionType === 'survival-rate') {
-    return (
-      <Box sx={{ mt: 2 }}>
-      </Box>
-    );
+    return <Box sx={{ mt: 2 }} />;
   }
   
   if (!xaiData) return null;
   
-  // 빈 데이터 체크
-  const hasFeatureImportance = xaiData.feature_importance && xaiData.feature_importance.length > 0;
+  // SHAP 데이터 유무만 체크
   const hasShapValues = xaiData.shap_values && xaiData.shap_values.feature_names && xaiData.shap_values.values;
-  const hasPermutationImportance = xaiData.permutation_importance && xaiData.permutation_importance.length > 0;
-  
-  // 모든 데이터가 없으면 컴포넌트를 렌더링하지 않음
-  if (!hasFeatureImportance && !hasShapValues && !hasPermutationImportance) {
-    return (
-      <Box sx={{ mt: 2 }}>
-        <Alert severity="warning" icon="⚠️">
-          <Typography variant="body2">
-            이 예측 모델에 대한 XAI 설명 데이터를 생성할 수 없습니다.
-          </Typography>
-        </Alert>
-      </Box>
-    );
-  }
   
   return (
     <Accordion sx={{ mt: 2 }}>
       <AccordionSummary expandIcon={<ExpandMore />}>
         <Typography variant="h6" sx={{ color: themeColors?.primary || '#00897b' }}>
-          🔍 AI 모델 설명 (XAI)
+          🔍 AI 모델 설명 (SHAP 분석)
         </Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <Box sx={{ width: '100%' }}>
-          <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
-            {hasFeatureImportance && <Tab label="특성 중요도" />}
-            {hasShapValues && <Tab label="SHAP 분석" />}
-            {hasPermutationImportance && <Tab label="순열 중요도" />}
-          </Tabs>
-          
-          {/* 특성 중요도 탭 */}
-          {activeTab === 0 && hasFeatureImportance && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                모델이 예측에 사용한 주요 특성들
-              </Typography>
-              <TableContainer component={Paper} variant="outlined">
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>순위</TableCell>
-                      <TableCell>특성명</TableCell>
-                      <TableCell>중요도</TableCell>
-                      <TableCell>시각화</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {xaiData.feature_importance.slice(0, 10).map((feature, index) => (
+        {hasShapValues ? (
+          <Box sx={{ width: '100%' }}>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              SHAP 값은 각 특성이 최종 예측에 얼마나 기여했는지를 보여줍니다.
+              양수는 위험도 증가, 음수는 위험도 감소를 의미합니다.
+            </Alert>
+            <TableContainer component={Paper} variant="outlined">
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>특성명</TableCell>
+                    <TableCell>SHAP 값</TableCell>
+                    <TableCell>기여도</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {xaiData.shap_values.feature_names.map((feature, index) => {
+                    const shapValue = xaiData.shap_values.values[0]?.[index] || 0;
+                    const safeShapValue = typeof shapValue === 'number' ? shapValue : parseFloat(shapValue) || 0;
+                    
+                    return (
                       <TableRow key={index}>
-                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>{feature.replace(/_/g, ' ')}</TableCell>
                         <TableCell>
-                          <Typography variant="body2" fontWeight="medium">
-                            {feature.feature.replace(/_/g, ' ')}
-                          </Typography>
+                          <Chip
+                            label={safeShapValue.toFixed(4)}
+                            size="small"
+                            color={safeShapValue > 0 ? 'error' : 'success'}
+                            variant="outlined"
+                          />
                         </TableCell>
-                        <TableCell>{(feature.importance * 100).toFixed(2)}%</TableCell>
                         <TableCell>
                           <LinearProgress
                             variant="determinate"
-                            value={feature.importance * 100}
+                            value={Math.min(Math.abs(safeShapValue) * 100, 100)}
                             sx={{
                               width: 100,
                               height: 8,
                               borderRadius: 4,
                               backgroundColor: '#e0e0e0',
                               '& .MuiLinearProgress-bar': {
-                                backgroundColor: themeColors?.primary || '#00897b',
+                                backgroundColor: safeShapValue > 0 ? '#f44336' : '#4caf50',
                                 borderRadius: 4
                               }
                             }}
                           />
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-          )}
-          
-          {/* SHAP 분석 탭 */}
-          {((hasFeatureImportance && activeTab === 1) || (!hasFeatureImportance && activeTab === 0)) && hasShapValues && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                SHAP 값 분석 (개별 예측 기여도)
-              </Typography>
-              <Alert severity="info" sx={{ mb: 2 }}>
-                SHAP 값은 각 특성이 최종 예측에 얼마나 기여했는지를 보여줍니다.
-                양수는 위험도 증가, 음수는 위험도 감소를 의미합니다.
-              </Alert>
-              <TableContainer component={Paper} variant="outlined">
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>특성명</TableCell>
-                      <TableCell>SHAP 값</TableCell>
-                      <TableCell>기여도</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {xaiData.shap_values.feature_names.map((feature, index) => {
-                      const shapValue = xaiData.shap_values.values[0]?.[index] || 0;
-                      
-                      // 안전한 숫자 변환 추가
-                      const safeShapValue = typeof shapValue === 'number' ? shapValue : parseFloat(shapValue) || 0;
-                      
-                      return (
-                        <TableRow key={index}>
-                          <TableCell>{feature.replace(/_/g, ' ')}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={safeShapValue.toFixed(4)} // 안전한 값 사용
-                              size="small"
-                              color={safeShapValue > 0 ? 'error' : 'success'}
-                              variant="outlined"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <LinearProgress
-                              variant="determinate"
-                              value={Math.min(Math.abs(safeShapValue) * 100, 100)}
-                              sx={{
-                                width: 100,
-                                height: 8,
-                                borderRadius: 4,
-                                backgroundColor: '#e0e0e0',
-                                '& .MuiLinearProgress-bar': {
-                                  backgroundColor: safeShapValue > 0 ? '#f44336' : '#4caf50',
-                                  borderRadius: 4
-                                }
-                              }}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-          )}
-          
-          {/* 순열 중요도 탭 */}
-          {((hasFeatureImportance && hasShapValues && activeTab === 2) || 
-            (hasFeatureImportance && !hasShapValues && activeTab === 1) || 
-            (!hasFeatureImportance && !hasShapValues && activeTab === 0)) && hasPermutationImportance && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                순열 중요도 (Permutation Importance)
-              </Typography>
-              <Alert severity="info" sx={{ mb: 2 }}>
-                각 특성을 무작위로 섞었을 때 모델 성능이 얼마나 감소하는지를 측정합니다.
-              </Alert>
-              <TableContainer component={Paper} variant="outlined">
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>특성명</TableCell>
-                      <TableCell>중요도</TableCell>
-                      <TableCell>표준편차</TableCell>
-                      <TableCell>시각화</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {xaiData.permutation_importance.slice(0, 10).map((feature, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{feature.feature.replace(/_/g, ' ')}</TableCell>
-                        <TableCell>{feature.importance.toFixed(4)}</TableCell>
-                        <TableCell>±{feature.std.toFixed(4)}</TableCell>
-                        <TableCell>
-                          <LinearProgress
-                            variant="determinate"
-                            value={Math.min(Math.abs(feature.importance) * 1000, 100)}
-                            sx={{
-                              width: 100,
-                              height: 8,
-                              borderRadius: 4,
-                              backgroundColor: '#e0e0e0',
-                              '& .MuiLinearProgress-bar': {
-                                backgroundColor: themeColors?.secondary || '#14b8a6',
-                                borderRadius: 4
-                              }
-                            }}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-          )}
-        </Box>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        ) : (
+          <Alert severity="warning" icon="⚠️">
+            <Typography variant="body2">
+              이 예측 모델에 대한 SHAP 설명 데이터를 생성할 수 없습니다.
+            </Typography>
+          </Alert>
+        )}
       </AccordionDetails>
     </Accordion>
   );
@@ -291,7 +161,6 @@ const PredictionResults = ({
     'treatment-effect': '치료 효과 예측'
   };
 
-  // 안전한 색상 접근
   const primaryColor = themeColors?.primary || '#00897b';
   const infoColor = themeColors?.info || '#2196f3';
   const successColor = themeColors?.success || '#4caf50';
@@ -319,7 +188,7 @@ const PredictionResults = ({
           )}
         </Typography>
 
-        {Object.entries(allPredictionResults).map(([predType, result], index) => (
+        {Object.entries(allPredictionResults).map(([predType, result]) => (
           <Paper key={predType} elevation={3} sx={{ 
             mb: 3, 
             borderLeft: `4px solid ${getCancerTypeColor(detectedCancerType)}`,
@@ -408,13 +277,12 @@ const PredictionResults = ({
               )}
             </CardContent>
 
-            {/* 각 예측 타입별 XAI 설명 추가 */}
             {result && (
               <Box sx={{ px: 3, pb: 2 }}>
                 <XAIExplanation 
                   xaiData={result.xaiExplanation} 
                   themeColors={themeColors}
-                  predictionType={predType}  // 예측 타입 전달
+                  predictionType={predType}
                 />
               </Box>
             )}
@@ -509,11 +377,10 @@ const PredictionResults = ({
           />
         ))}
 
-        {/* XAI 설명 추가 */}
         <XAIExplanation 
           xaiData={predictionResults.xaiExplanation} 
           themeColors={themeColors}
-          predictionType={selectedPredictionType}  // 예측 타입 전달
+          predictionType={selectedPredictionType}
         />
       </Box>
     );

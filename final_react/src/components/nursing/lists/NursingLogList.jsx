@@ -1,13 +1,13 @@
-// final_react/src/components/nursing/lists/NursingLogList.jsx
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Button, 
-  TextField, InputAdornment, Grid, Chip, Modal,
-  Avatar, IconButton, Stack
+  Box, Typography, Button, TextField, InputAdornment, 
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Chip, Modal, IconButton, Stack, Pagination,
+  FormControl, Select, MenuItem, InputLabel, Tooltip
 } from '@mui/material';
 import { 
   Search, Add, Visibility, Edit, Delete, MoreVert,
-  Description, Person
+  Description, Person, CheckCircle, Schedule
 } from '@mui/icons-material';
 
 import { nursingApiService } from '../../../services/nursingApi';
@@ -23,6 +23,12 @@ export default function NursingLogList({ selectedPatient }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  
+  // [게시판 페이징 상태]
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   const logTypes = [
     { value: '', label: '전체' },
@@ -53,21 +59,40 @@ export default function NursingLogList({ selectedPatient }) {
     }
   };
 
+  // [필터링 및 정렬 로직]
   const filteredLogs = nursingLogs.filter(log => {
     const matchesSearch = searchTerm === '' || 
       log.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.content?.toLowerCase().includes(searchTerm.toLowerCase());
+      log.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.patient_name?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesType = filterType === '' || log.log_type === filterType;
     
     return matchesSearch && matchesType;
+  }).sort((a, b) => {
+    const aValue = a[sortBy];
+    const bValue = b[sortBy];
+    
+    if (sortOrder === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
   });
+
+  // [페이징 계산]
+  const totalPages = Math.ceil(filteredLogs.length / rowsPerPage);
+  const paginatedLogs = filteredLogs.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
-      month: 'short',
-      day: 'numeric',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -115,6 +140,15 @@ export default function NursingLogList({ selectedPatient }) {
     }
   };
 
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('desc');
+    }
+  };
+
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
       <Typography>간호일지 목록을 불러오는 중...</Typography>
@@ -129,7 +163,7 @@ export default function NursingLogList({ selectedPatient }) {
 
   return (
     <Box sx={{ p: 3, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
-      {/* 헤더 - 하얀 박스 + 포인트 색 줄 */}
+      {/* [헤더 섹션] */}
       <Box sx={{ 
         bgcolor: 'white',
         borderRadius: 1,
@@ -145,19 +179,19 @@ export default function NursingLogList({ selectedPatient }) {
             mb: 3 
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant="h4" fontWeight="bold" sx={{ mr: 2, color: '#374151' }}>
-                📋 간호일지 목록
+              <Typography variant="h5" fontWeight="bold" sx={{ mr: 2, color: '#374151' }}>
+                간호일지 게시판
               </Typography>
               <Typography variant="h6" color="#E0969F" fontWeight="600">
                 {filteredLogs.length}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-                개의 일지
+                개의 게시글
               </Typography>
             </Box>
             
             <Box sx={{ display: 'flex', gap: 2 }}>
-             <Button
+              <Button
                 variant="contained"
                 startIcon={<Add />}
                 onClick={() => setShowCreateForm(true)}
@@ -166,7 +200,7 @@ export default function NursingLogList({ selectedPatient }) {
                   '&:hover': { bgcolor: '#C8797F' }
                 }}
               >
-                직접 작성
+                새 글 작성
               </Button>
               <Button
                 variant="outlined"
@@ -185,14 +219,15 @@ export default function NursingLogList({ selectedPatient }) {
             </Box>
           </Box>
 
-          {/* 검색 및 필터 */}
+          {/* [검색 및 필터 섹션] */}
           <Box sx={{ 
             display: 'flex', 
             gap: 2, 
-            alignItems: 'center'
+            alignItems: 'center',
+            mb: 2
           }}>
             <TextField
-              placeholder="제목 또는 내용 검색..."
+              placeholder="제목, 내용, 환자명 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
@@ -213,217 +248,290 @@ export default function NursingLogList({ selectedPatient }) {
               }}
             />
             
-            <TextField
-              select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              sx={{ 
-                minWidth: 140,
-                '& .MuiOutlinedInput-root': {
+            <FormControl sx={{ minWidth: 140 }}>
+              <InputLabel>카테고리</InputLabel>
+              <Select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                label="카테고리"
+                sx={{
                   bgcolor: '#f9fafb',
                   '& fieldset': { borderColor: '#e5e7eb' },
                   '&:hover fieldset': { borderColor: '#E0969F' },
                   '&.Mui-focused fieldset': { borderColor: '#E0969F' }
-                }
-              }}
-              SelectProps={{
-                native: true,
-              }}
-            >
-              {logTypes.map(type => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </TextField>
+                }}
+              >
+                {logTypes.map(type => (
+                  <MenuItem key={type.value} value={type.value}>
+                    {type.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl sx={{ minWidth: 120 }}>
+              <InputLabel>표시 개수</InputLabel>
+              <Select
+                value={rowsPerPage}
+                onChange={(e) => setRowsPerPage(e.target.value)}
+                label="표시 개수"
+                sx={{
+                  bgcolor: '#f9fafb',
+                  '& fieldset': { borderColor: '#e5e7eb' },
+                  '&:hover fieldset': { borderColor: '#E0969F' },
+                  '&.Mui-focused fieldset': { borderColor: '#E0969F' }
+                }}
+              >
+                <MenuItem value={5}>5개</MenuItem>
+                <MenuItem value={10}>10개</MenuItem>
+                <MenuItem value={20}>20개</MenuItem>
+                <MenuItem value={50}>50개</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </Box>
       </Box>
 
-      {/* 간호일지 카드 목록 */}
-      <Grid container spacing={3}>
-        {filteredLogs.length === 0 ? (
-          <Grid item xs={12}>
-            <Box sx={{ 
-              textAlign: 'center', 
-              py: 8,
-              bgcolor: 'white',
-              borderRadius: 1,
-              border: '1px solid #e5e7eb',
-              borderLeft: '4px solid #E0969F'
-            }}>
-              <Description sx={{ fontSize: 60, color: '#E0969F', mb: 2 }} />
-              <Typography variant="h6" sx={{ color: '#374151', mb: 1 }}>
-                간호일지가 없습니다
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                새로운 간호일지를 작성해보세요!
-              </Typography>
-            </Box>
-          </Grid>
-        ) : (
-          filteredLogs.map((log) => (
-            <Grid item xs={12} lg={6} key={log.id}>
-              {/* 하얀 박스 + 포인트 색 줄 디자인 */}
-              <Box sx={{ 
-                bgcolor: 'white',
-                border: '1px solid #e5e7eb',
-                borderLeft: '4px solid #E0969F',
-                borderRadius: 1,
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                }
-              }}>
-                <Box sx={{ p: 3 }}>
-                  {/* 카드 헤더 */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    mb: 2
-                  }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      {/* [게시판 테이블 섹션] */}
+      <Box sx={{ 
+        bgcolor: 'white',
+        borderRadius: 1,
+        border: '1px solid #e5e7eb',
+        borderLeft: '4px solid #E0969F'
+      }}>
+        <TableContainer component={Paper} elevation={0}>
+          <Table sx={{ minWidth: 650 }}>
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151', width: '60px' }}>
+                  번호
+                </TableCell>
+                <TableCell 
+                  sx={{ fontWeight: 'bold', color: '#374151', cursor: 'pointer' }}
+                  onClick={() => handleSort('log_type')}
+                >
+                  카테고리
+                </TableCell>
+                <TableCell 
+                  sx={{ fontWeight: 'bold', color: '#374151', cursor: 'pointer' }}
+                  onClick={() => handleSort('title')}
+                >
+                  제목
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>
+                  환자 정보
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>
+                  작성자
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>
+                  작성방식
+                </TableCell>
+                <TableCell 
+                  sx={{ fontWeight: 'bold', color: '#374151', cursor: 'pointer' }}
+                  onClick={() => handleSort('created_at')}
+                >
+                  작성일시
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>
+                  상태
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#374151', width: '120px' }}>
+                  관리
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedLogs.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} sx={{ textAlign: 'center', py: 8 }}>
+                    <Description sx={{ fontSize: 60, color: '#E0969F', mb: 2 }} />
+                    <Typography variant="h6" sx={{ color: '#374151', mb: 1 }}>
+                      간호일지가 없습니다
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      새로운 간호일지를 작성해보세요!
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedLogs.map((log, index) => (
+                  <TableRow 
+                    key={log.id}
+                    sx={{ 
+                      '&:hover': { bgcolor: '#f8f9fa' },
+                      borderBottom: '1px solid #e5e7eb'
+                    }}
+                  >
+                    <TableCell sx={{ color: '#6b7280' }}>
+                      {(page - 1) * rowsPerPage + index + 1}
+                    </TableCell>
+                    
+                    <TableCell>
                       <Chip 
                         label={getLogTypeDisplay(log.log_type)}
                         size="small"
                         sx={{ 
                           bgcolor: '#E0969F',
                           color: 'white',
-                          mr: 1,
                           fontWeight: 600
                         }}
                       />
-                      <Typography variant="caption" color="text.secondary">
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Typography 
+                        variant="body2" 
+                        fontWeight="500"
+                        sx={{ 
+                          color: '#374151',
+                          cursor: 'pointer',
+                          '&:hover': { color: '#E0969F' }
+                        }}
+                        onClick={() => handleViewDocument(log)}
+                      >
+                        {log.title || `${log.patient_name} - ${getLogTypeDisplay(log.log_type)}`}
+                      </Typography>
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Box>
+                        <Typography variant="body2" fontWeight="500" sx={{ color: '#374151' }}>
+                          {log.patient_name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {log.patient_age}세 {log.patient_gender}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: '#374151' }}>
+                        {log.nurse_name || '기본 간호사'}
+                      </Typography>
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Chip 
+                          label={log.writing_mode === 'ai_generated' ? 'AI 생성' : '직접 작성'}
+                          size="small"
+                          sx={{ 
+                            bgcolor: '#f3f4f6',
+                            color: '#374151',
+                            fontSize: '0.75rem'
+                          }}
+                        />
+                        <Chip 
+                          label={`신뢰도 ${log.ai_confidence_score || 100}%`}
+                          size="small"
+                          sx={{ 
+                            bgcolor: '#e8f5e8',
+                            color: '#2e7d32',
+                            fontSize: '0.75rem'
+                          }}
+                        />
+                      </Box>
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: '#374151' }}>
                         {formatDate(log.created_at)}
                       </Typography>
-                    </Box>
+                    </TableCell>
                     
-                    <IconButton size="small" sx={{ color: '#9ca3af' }}>
-                      <MoreVert />
-                    </IconButton>
-                  </Box>
-
-                  {/* 간호일지 정보 */}
-                  <Box sx={{ mb: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <Avatar sx={{ 
-                        bgcolor: '#f3f4f6',
-                        color: '#374151',
-                        width: 48,
-                        height: 48,
-                        mr: 2,
-                        fontSize: '1.2rem'
-                      }}>
-                        <Description />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h6" fontWeight="bold" sx={{ 
-                          color: '#374151',
-                          fontSize: '1.1rem',
-                          mb: 0.5
-                        }}>
-                          {log.title || `${log.patient_name} - ${getLogTypeDisplay(log.log_type)}`}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            작성방식:
-                          </Typography>
-                          <Chip 
-                            label={log.writing_mode === 'ai_generated' ? 'AI 생성' : '직접 작성'}
+                    <TableCell>
+                      <Chip 
+                        label={log.status === 'approved' ? '승인' : '검토중'}
+                        color={log.status === 'approved' ? 'success' : 'warning'}
+                        size="small"
+                        sx={{ fontWeight: 600 }}
+                        icon={log.status === 'approved' ? <CheckCircle /> : <Schedule />}
+                      />
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Stack direction="row" spacing={0.5}>
+                        <Tooltip title="문서 보기">
+                          <IconButton 
+                            size="small"
+                            onClick={() => handleViewDocument(log)}
+                            sx={{ 
+                              color: '#E0969F',
+                              '&:hover': { bgcolor: '#f3f4f6' }
+                            }}
+                          >
+                            <Visibility fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        
+                        {log.status !== 'approved' && (
+                          <Tooltip title="승인">
+                            <IconButton 
+                              size="small"
+                              onClick={() => handleApprove(log.id)}
+                              sx={{ 
+                                color: '#059669',
+                                '&:hover': { bgcolor: '#f3f4f6' }
+                              }}
+                            >
+                              <CheckCircle fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        
+                        <Tooltip title="더보기">
+                          <IconButton 
                             size="small"
                             sx={{ 
-                              bgcolor: '#f3f4f6',
-                              color: '#374151',
-                              fontSize: '0.75rem'
+                              color: '#6b7280',
+                              '&:hover': { bgcolor: '#f3f4f6' }
                             }}
-                          />
-                          <Typography variant="body2" color="text.secondary">
-                            신뢰도:
-                          </Typography>
-                          <Chip 
-                            label={`${log.ai_confidence_score || 100}%`}
-                            size="small"
-                            sx={{ 
-                              bgcolor: '#e8f5e8',
-                              color: '#2e7d32',
-                              fontSize: '0.75rem'
-                            }}
-                          />
-                        </Box>
-                      </Box>
-                    </Box>
-                    
-                    <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        환자: {log.patient_name} ({log.patient_age}세 {log.patient_gender})
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        작성자: {log.nurse_name || '기본 간호사'}
-                      </Typography>
-                    </Box>
-                  </Box>
+                          >
+                            <MoreVert fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-                  {/* 상태 및 액션 버튼 */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <Chip 
-                      label={log.status === 'approved' ? '승인' : '검토중'}
-                      color={log.status === 'approved' ? 'success' : 'warning'}
-                      size="small"
-                      sx={{ fontWeight: 600 }}
-                    />
-                    
-                    <Stack direction="row" spacing={1}>
-                      <Button 
-                        size="small" 
-                        variant="contained"
-                        startIcon={<Visibility />}
-                        onClick={() => handleViewDocument(log)}
-                        sx={{ 
-                          bgcolor: '#E0969F',
-                          '&:hover': { bgcolor: '#C8797F' },
-                          fontSize: '0.75rem',
-                          px: 2
-                        }}
-                      >
-                        문서 보기
-                      </Button>
-                      {log.status !== 'approved' && (
-                        <Button 
-                          size="small"
-                          variant="outlined"
-                          onClick={() => handleApprove(log.id)}
-                          sx={{ 
-                            color: '#E0969F',
-                            borderColor: '#E0969F',
-                            '&:hover': {
-                              bgcolor: '#E0969F',
-                              color: 'white'
-                            },
-                            fontSize: '0.75rem',
-                            px: 2
-                          }}
-                        >
-                          승인
-                        </Button>
-                      )}
-                    </Stack>
-                  </Box>
-                </Box>
-              </Box>
-            </Grid>
-          ))
+        {/* [페이징 섹션] */}
+        {filteredLogs.length > 0 && (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            p: 2,
+            borderTop: '1px solid #e5e7eb'
+          }}>
+            <Typography variant="body2" color="text.secondary">
+              총 {filteredLogs.length}개 중 {(page - 1) * rowsPerPage + 1}-{Math.min(page * rowsPerPage, filteredLogs.length)}개 표시
+            </Typography>
+            
+            <Pagination 
+              count={totalPages}
+              page={page}
+              onChange={(event, value) => setPage(value)}
+              color="primary"
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  '&.Mui-selected': {
+                    bgcolor: '#E0969F',
+                    '&:hover': { bgcolor: '#C8797F' }
+                  }
+                }
+              }}
+            />
+          </Box>
         )}
-      </Grid>
-      {/* 간호일지 문서 모달 */}
+      </Box>
+
+      {/* [간호일지 문서 모달] */}
       {showDocument && selectedLog && (
         <Modal 
           open={showDocument} 
@@ -440,7 +548,7 @@ export default function NursingLogList({ selectedPatient }) {
         </Modal>
       )}
 
-      {/* 간호일지 직접 작성 모달 추가 */}
+      {/* [간호일지 직접 작성 모달] */}
       {showCreateForm && (
         <Modal 
           open={showCreateForm} 
@@ -452,7 +560,7 @@ export default function NursingLogList({ selectedPatient }) {
               onClose={() => setShowCreateForm(false)}
               onSuccess={() => {
                 setShowCreateForm(false);
-                fetchNursingLogs(); // 목록 새로고침
+                fetchNursingLogs();
               }}
               initialData={{ patient_id: selectedPatient }}
             />

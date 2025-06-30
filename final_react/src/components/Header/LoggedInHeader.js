@@ -24,7 +24,7 @@ function LoggedInHeader() {
       'admin': '관리자',
       'staff': '원무과',
       'patient': '환자',
-      'radiologist': '방사선사'
+      'radiologist': '영상의학과'
     };
     return labels[userType] || '사용자';
   };
@@ -37,7 +37,7 @@ function LoggedInHeader() {
             className="brand-button"
             onClick={() => navigate('/')}
           >
-            🏥 CDSS 병원
+            MEORING
           </button>
         </div>
         

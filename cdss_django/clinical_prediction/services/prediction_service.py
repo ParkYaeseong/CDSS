@@ -193,134 +193,74 @@ class ClinicalPredictionService:
                         }
     
     def _generate_xai_explanation(self, model_info, processed_data, cancer_type, prediction_type, patient_data=None):
-        """XAI 설명 생성 - 암종별 개별화"""
+        """XAI 설명 생성 - 최종 정리 버전 (SHAP 및 Feature Importance 활용)"""
         try:
             if prediction_type == 'survival':
-                logger.info(f"생존 모델은 XAI 지원 제한: {cancer_type}")
-                return {
-                    'feature_importance': [],
-                    'shap_values': None,
-                    'permutation_importance': None,
-                    'metadata': {
-                        'cancer_type': cancer_type,
-                        'prediction_type': prediction_type,
-                        'patient_specific': False,
-                        'note': 'Survival models do not support standard XAI methods'
-                    }
-                }
-            
-            # 모델 정보 추출
+                logger.info(f"생존 모델은 XAI를 지원하지 않아 설명을 건너뜁니다: {cancer_type}")
+                return { 'feature_importance': [], 'shap_values': None, 'metadata': { 'note': 'Survival models do not support standard XAI methods' } }
+
             model = model_info['model']
             feature_names = model_info.get('feature_names', processed_data.columns.tolist())
             model_type = model_info.get('model_type', 'Unknown')
-            
-            # 고유 식별자 생성 (환자별, 암종별, 모델별)
-            patient_hash = hash(str(processed_data.values.tolist())) % 10000
-            unique_id = f"{cancer_type}_{prediction_type}_{model_type}_{patient_hash}"
+            unique_id = f"{cancer_type}_{prediction_type}_{model_type}"
             
             explanations = {
-                'feature_importance': [],
-                'shap_values': None,
-                'permutation_importance': None,
+                'feature_importance': [],  # 모델의 전반적인 특성 중요도 (Global)
+                'shap_values': None,       # 이 예측에 대한 특성별 기여도 (Local)
                 'unique_id': unique_id,
                 'model_specific': True
             }
-            
-            logger.info(f"XAI 생성: {unique_id}")
-            
-            if prediction_type in ['risk', 'treatment']:
-                # 1. Feature Importance (모델별)
-                if hasattr(model, 'feature_importances_'):
-                    importances = model.feature_importances_
-                    
-                    # 암종별 특성 가중치 적용
-                    cancer_weights = self._get_cancer_specific_weights(cancer_type, prediction_type)
-                    
-                    feature_importance = []
-                    for i, feature_name in enumerate(feature_names):
-                        if i < len(importances):
-                            base_importance = float(importances[i])
-                            weight = cancer_weights.get(feature_name, 1.0)
-                            weighted_importance = base_importance * weight
-                            
-                            feature_importance.append({
-                                'feature': feature_name,
-                                'importance': weighted_importance,
-                                'base_importance': base_importance,
-                                'cancer_weight': weight,
-                                'patient_value': float(processed_data.iloc[0, i]) if i < len(processed_data.columns) else 0.0,
-                                'cancer_type': cancer_type,
-                                'model_type': model_type
-                            })
-                    
-                    feature_importance.sort(key=lambda x: x['importance'], reverse=True)
-                    explanations['feature_importance'] = feature_importance[:10]
+            logger.info(f"XAI 설명 생성 시작: {unique_id}")
+
+            # --- 1. 모델의 전반적인 특성 중요도 (Gini Importance 등) 계산 ---
+            # 모델 전체적으로 어떤 특성이 중요한지에 대한 정보
+            if hasattr(model, 'feature_importances_'):
+                importances = model.feature_importances_
+                cancer_weights = self._get_cancer_specific_weights(cancer_type, prediction_type)
+                feature_details = []
+                for i, feature_name in enumerate(feature_names):
+                    if i < len(importances):
+                        base_importance = float(importances[i])
+                        weight = cancer_weights.get(feature_name, 1.0)
+                        feature_details.append({'feature': feature_name, 'weighted_importance': base_importance * weight})
                 
-                # 2. SHAP Values (모델별 새로운 설명기)
-                try:
-                    # 매번 새로운 설명기 생성
-                    explainer = shap.TreeExplainer(model)
-                    shap_values = explainer(processed_data)
-                    
-                    explanations['shap_values'] = {
-                        'values': shap_values.values.tolist(),
-                        'base_values': shap_values.base_values.tolist() if hasattr(shap_values, 'base_values') else None,
-                        'feature_names': feature_names,
-                        'cancer_type': cancer_type,
-                        'prediction_type': prediction_type,
-                        'model_type': model_type,
-                        'unique_id': unique_id
-                    }
-                except Exception as e:
-                    logger.warning(f"SHAP 계산 실패 ({unique_id}): {e}")
+                total_weighted_sum = sum(item['weighted_importance'] for item in feature_details)
+                feature_importance_final = []
+                if total_weighted_sum > 0:
+                    for item in feature_details:
+                        normalized_importance = (item['weighted_importance'] / total_weighted_sum) * 100
+                        feature_importance_final.append({'feature': item['feature'], 'importance': normalized_importance})
                 
-                # 3. Permutation Importance (모델별 다른 타겟)
-                try:
-                    if hasattr(model, 'predict'):
-                        # 암종별, 예측타입별 다른 더미 타겟
-                        dummy_target = self._generate_model_specific_target(
-                            cancer_type, prediction_type, model_type, len(processed_data)
-                        )
-                        
-                        perm_importance = permutation_importance(
-                            model, processed_data, dummy_target,
-                            n_repeats=3, 
-                            random_state=hash(unique_id) % 1000, 
-                            n_jobs=1
-                        )
-                        
-                        perm_features = [
-                            {
-                                'feature': feature_names[i] if i < len(feature_names) else f'feature_{i}',
-                                'importance': float(perm_importance.importances_mean[i]),
-                                'std': float(perm_importance.importances_std[i]),
-                                'cancer_type': cancer_type,
-                                'prediction_type': prediction_type,
-                                'model_type': model_type,
-                                'patient_value': float(processed_data.iloc[0, i]) if i < len(processed_data.columns) else 0.0
-                            }
-                            for i in range(len(processed_data.columns))
-                        ]
-                        perm_features.sort(key=lambda x: x['importance'], reverse=True)
-                        explanations['permutation_importance'] = perm_features[:10]
-                        
-                except Exception as e:
-                    logger.warning(f"Permutation importance 실패 ({unique_id}): {e}")
-            
-            # 메타데이터 추가
+                feature_importance_final.sort(key=lambda x: x['importance'], reverse=True)
+                explanations['feature_importance'] = feature_importance_final[:10]
+
+            # --- 2. SHAP 값 계산 (개별 예측에 대한 설명) ---
+            # "이 환자"의 예측에 각 특성이 얼마나, 어떻게 기여했는지에 대한 정보
+            try:
+                explainer = shap.TreeExplainer(model)
+                shap_values = explainer(processed_data)
+                explanations['shap_values'] = {
+                    'values': shap_values.values.tolist(),
+                    'base_values': shap_values.base_values.tolist() if hasattr(shap_values, 'base_values') else None,
+                    'feature_names': feature_names
+                }
+                logger.info("SHAP 값 계산 성공")
+            except Exception as e:
+                logger.warning(f"SHAP 계산 실패 ({unique_id}): {e}")
+
+            # --- 최종 결과 조합 ---
             explanations['metadata'] = {
                 'cancer_type': cancer_type,
                 'prediction_type': prediction_type,
                 'patient_specific': True,
                 'timestamp': pd.Timestamp.now().isoformat()
             }
-            
             return explanations
             
         except Exception as e:
-            logger.error(f"XAI 설명 생성 실패 ({cancer_type}-{prediction_type}): {e}")
+            logger.error(f"XAI 설명 생성 전체 실패 ({cancer_type}-{prediction_type}): {e}")
             return {'error': str(e), 'cancer_type': cancer_type, 'prediction_type': prediction_type}
-
+                        
     def _get_cancer_specific_weights(self, cancer_type, prediction_type):
         """암종별 예측 타입별 특성 가중치 반환"""
         weights = {
@@ -428,20 +368,25 @@ class ClinicalPredictionService:
             raise ValueError(f"환자 데이터 조회 실패: {str(e)}")
     
     def _determine_cancer_type(self, clinical_data):
-        """임상 데이터에서 암종 판별"""
+        """임상 데이터에서 암종 판별 (수정된 최종 버전)"""
         cancer_type_field = getattr(clinical_data, 'cancer_type', None)
         
         cancer_mapping = {
-            'STAD': 'stomach',
-            'KIRC': 'kidney',
-            'LIHC': 'liver'
+            'STAD': 'stomach', 'KIRC': 'kidney', 'LIHC': 'liver'
         }
         
         if cancer_type_field:
+            # 1. '신장암(KIRC)' 와 같은 형식인지 먼저 확인
             if '(' in cancer_type_field and ')' in cancer_type_field:
-                cancer_code = cancer_type_field.split('(')[1].split(')')[0].strip()
-                return cancer_mapping.get(cancer_code, 'liver')
-        
+                cancer_code = cancer_type_field.split('(')[1].split(')')[0].strip().upper()
+                return cancer_mapping.get(cancer_code, 'liver') # 기본값은 여전히 liver
+            
+            # 2. 'kidney', 'liver', 'stomach' 와 같은 직접적인 문자열인지 확인
+            simple_cancer_type = cancer_type_field.lower()
+            if simple_cancer_type in ['liver', 'kidney', 'stomach']:
+                return simple_cancer_type
+
+        # 3. 위에서 판별되지 않으면, primary_diagnosis 필드로 확인
         primary_diagnosis = getattr(clinical_data, 'primary_diagnosis', '').lower()
         if 'liver' in primary_diagnosis or 'hepatocellular' in primary_diagnosis:
             return 'liver'
@@ -450,6 +395,8 @@ class ClinicalPredictionService:
         elif 'stomach' in primary_diagnosis or 'gastric' in primary_diagnosis:
             return 'stomach'
         
+        # 4. 그래도 판별이 안되면, 기본값으로 'liver'를 반환 (기존 로직 유지)
+        logger.warning(f"암종을 판별할 수 없어 기본값 'liver'를 사용합니다. DB 데이터: {cancer_type_field}")
         return 'liver'
     
     def _preprocess_patient_data_for_model(self, clinical_data, cancer_type, prediction_type):

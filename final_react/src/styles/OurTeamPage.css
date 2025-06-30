@@ -1,129 +1,307 @@
-/* ============================= */
-/* 💠 상단 홈 버튼 스타일 */
-.top-nav {
-  position: fixed;
-  top: 20px;
-  right: 24px;
-  z-index: 1000;
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #50e3c2;
+    --background-color: #f8f9fa;
+    --card-bg-color: #ffffff;
+    --text-color: #333;
+    --text-light-color: #555;
+    --border-color: #e9ecef;
+    --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
-.top-nav button {
-  padding: 6px 12px;
-  font-size: 14px;
-  background-color: #0077b6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    overflow-x: hidden;
 }
 
-.top-nav button:hover {
-  background-color: #005f94;
+.team-page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
 }
 
-/* ============================= */
-/* 💠 인트로 영역 */
+.team-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.team-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.team-slogan {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+}
+
 .team-intro {
-  height: 100vh;
-  text-align: center;
-  padding: 80px 20px 40px;
-  background: #f8f9fa;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-light-color);
 }
 
-.team-intro h1 {
-  font-size: 3rem;
-  color: #003049;
-  margin-bottom: 10px;
+.team-grid-section {
+    padding-top: 2rem;
+    width: 100%;
 }
 
-.team-intro .sub {
-  font-size: 1.2rem;
-  color: #555;
-  margin-bottom: 40px;
+.team-layout-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
 }
 
-.team-intro img {
-  width: 220px;
-  max-width: 60%;
-  margin-bottom: 30px;
+.team-row {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
-.scroll-indicator {
-  font-size: 2rem;
-  animation: bounce 1.6s infinite;
-  color: #0077b6;
+.member-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--card-bg-color);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+    flex-shrink: 0;
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(10px); }
+.member-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px var(--shadow-color);
+    border-color: var(--primary-color);
 }
 
-/* ============================= */
-/* 💠 스크롤 본문 영역 */
-.team-scroll-container {
-  display: flex;
-  position: relative;
-  height: 100%;
-  background-color: #f8f9fa;
+.member-card.active {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 8px 15px rgba(74, 144, 226, 0.3);
+    transform: scale(1.05);
 }
 
-.text-scroll-area {
-  width: 50%;
-  padding: 100px 40px;
+.member-card.active .card-role {
+    color: rgba(255, 255, 255, 0.8);
 }
 
-.image-fixed {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  width: 50%;
-  background-color: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.card-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--secondary-color);
 }
 
-.image-fixed img {
-  width: 80%;
-  max-height: 70vh;
-  object-fit: contain;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.6s ease;
+.card-info {
+    display: flex;
+    flex-direction: column;
 }
 
-.team-section {
-  min-height: 100vh;
-  padding: 60px 20px;
-  border-bottom: 1px dashed #ccc;
-  opacity: 0.4;
-  transition: all 0.3s ease-in-out;
+.card-name {
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
-.team-section.active {
-  opacity: 1;
+.card-role {
+    font-size: 0.9rem;
+    color: var(--text-light-color);
+    transition: color 0.3s ease;
 }
 
-.team-section h2 {
-  font-size: 32px;
-  color: #003049;
+.member-showcase {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 4rem;
+    align-items: center;
+    margin-top: 4rem;
+    padding-top: 4rem;
+    border-top: 1px solid var(--border-color);
 }
 
-.team-section h4 {
-  color: #0077b6;
-  font-size: 18px;
-  margin-top: 10px;
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out forwards;
 }
 
-.team-section p {
-  font-size: 16px;
-  margin-top: 16px;
-  max-width: 500px;
-  color: #444;
+.fade-out {
+    animation: fadeOut 0.3s ease-in-out forwards;
+}
+
+.showcase-image-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    transition: transform 0.3s ease;
+}
+
+.showcase-image-wrapper:hover {
+    transform: scale(1.03);
+}
+
+.showcase-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.detail-text-wrapper > * {
+    opacity: 0;
+    animation: slideUp 0.6s ease-out forwards;
+}
+
+.detail-quote { animation-delay: 0.2s !important; }
+.detail-name { animation-delay: 0.3s !important; }
+.detail-role { animation-delay: 0.4s !important; }
+.detail-description { animation-delay: 0.5s !important; }
+.skills-container { animation-delay: 0.6s !important; }
+
+.detail-quote {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    border-left: 4px solid var(--secondary-color);
+    padding-left: 1.5rem;
+}
+
+.detail-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.detail-role {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--text-light-color);
+    margin-bottom: 2rem;
+}
+
+.detail-description {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-light-color);
+    margin-bottom: 2rem;
+}
+
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.skill-tag {
+    background-color: #e7f3ff;
+    color: var(--primary-color);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+    transition: all 0.2s ease;
+}
+
+.skill-tag:hover {
+    transform: translateY(-2px);
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.selection-prompt {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--text-light-color);
+    font-size: 1.1rem;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    margin-top: 2rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .team-page-container {
+        padding: 2rem 1rem;
+    }
+    .team-header h1 {
+        font-size: 2.5rem;
+    }
+    .team-header p {
+        font-size: 1rem;
+    }
+    .member-showcase {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+    }
+    .showcase-image-wrapper {
+        width: 70%;
+        margin: 0 auto;
+    }
+    .detail-text-wrapper {
+        text-align: center;
+    }
+    .detail-quote {
+        font-size: 1.2rem;
+        padding-left: 0;
+        border-left: none;
+        border-top: 3px solid var(--secondary-color);
+        padding-top: 1rem;
+    }
+    .detail-name {
+        font-size: 2rem;
+    }
+    .skills-container {
+        justify-content: center;
+    }
 }

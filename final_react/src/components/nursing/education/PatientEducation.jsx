@@ -157,7 +157,7 @@ export default function PatientEducation({ patients, onRefresh }) {
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
+              <FormControl sx={{ overflow:'visible', width: '120px', margin: '0 auto' }}>
                 <InputLabel>환자 선택</InputLabel>
                 <Select
                   value={newEducation.patientName}
@@ -173,7 +173,7 @@ export default function PatientEducation({ patients, onRefresh }) {
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
+              <FormControl sx={{ overflow:'visible', width: '120px', margin: '0 auto' }}>
                 <InputLabel>교육 주제</InputLabel>
                 <Select
                   value={newEducation.topic}
@@ -189,7 +189,7 @@ export default function PatientEducation({ patients, onRefresh }) {
               </FormControl>
             </Grid>
             <Grid item xs={12} md={4}>
-              <FormControl fullWidth>
+              <FormControl sx={{ overflow:'visible', width: '120px', margin: '0 auto' }}>
                 <InputLabel>교육 방법</InputLabel>
                 <Select
                   value={newEducation.method}
@@ -215,7 +215,7 @@ export default function PatientEducation({ patients, onRefresh }) {
               />
             </Grid>
             <Grid item xs={12} md={4}>
-              <FormControl fullWidth>
+              <FormControl sx={{ overflow:'visible', width: '120px', margin: '0 auto' }}>
                 <InputLabel>이해도</InputLabel>
                 <Select
                   value={newEducation.understanding}

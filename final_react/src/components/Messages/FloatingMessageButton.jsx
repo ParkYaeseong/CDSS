@@ -88,23 +88,34 @@ function FloatingMessageButton({ onClose }) {
   };
 
   const fetchUnreadCount = async () => {
-    try {
-      const response = await messageService.getMessages();
-      if (response.success) {
-        setUnreadCount(response.unread_count || 0);
-        const unreadUsers = response.messages?.received?.filter(msg => !msg.is_read) || [];
-        const uniqueUnreadUsers = unreadUsers.reduce((acc, msg) => {
-          if (!acc.find(u => u.id === msg.sender?.id)) {
-            acc.push(msg.sender);
-          }
-          return acc;
-        }, []);
-        setUnreadMessages(uniqueUnreadUsers);
-      }
-    } catch (error) {
-      console.error('읽지 않은 메시지 수 조회 실패:', error);
+  try {
+    const response = await messageService.getMessages();
+    if (response.success) {
+      setUnreadCount(response.unread_count || 0);
+      
+      const unreadUsers = response.messages?.received?.filter(msg => !msg.is_read) || [];
+      const uniqueUnreadUsers = unreadUsers.reduce((acc, msg) => {
+        // Flutter 환자 메시지 처리 (sender 객체가 없을 수 있음)
+        const sender = msg.sender || {
+          id: msg.sender_id,
+          name: msg.sender_name,
+          username: msg.sender_username,
+          user_type: msg.sender_type
+        };
+        
+        if (sender && sender.id && !acc.find(u => u && u.id === sender.id)) {
+          acc.push(sender);
+        }
+        return acc;
+      }, []);
+      
+      setUnreadMessages(uniqueUnreadUsers);
     }
-  };
+  } catch (error) {
+    console.error('읽지 않은 메시지 수 조회 실패:', error);
+  }
+};
+
 
   const getUserTypeColor = (userType) => {
     const colors = {
@@ -125,7 +136,8 @@ function FloatingMessageButton({ onClose }) {
       'admin': '관리자', 
       'staff': '원무과',
       'patient': '환자',
-      'radiologist': '방사선사'
+      'radio': '영상의학과',        // ← 추가
+      'radiologist': '영상의학과'
     };
     return labels[userType] || '사용자';
   };
@@ -165,21 +177,32 @@ function FloatingMessageButton({ onClose }) {
   };
 
   const getFilteredUsersByRole = (role) => {
-    return users.filter(user => {
+    console.log('필터링 중:', role, '전체 사용자:', users); // 디버깅 로그
+    const filtered = users.filter(user => {
       const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           user.username?.toLowerCase().includes(searchTerm.toLowerCase());
+                          user.username?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRole = role === 'all' || user.user_type === role;
+      console.log(`사용자 ${user.username}: user_type=${user.user_type}, matchesRole=${matchesRole}`); // 디버깅 로그
       return matchesSearch && matchesRole;
     });
+    console.log('필터링 결과:', filtered); // 디버깅 로그
+    return filtered;
   };
 
   const getCurrentTabUsers = () => {
     switch (activeTab) {
       case 0:
-        return unreadMessages.filter(user =>
-          user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.username?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        // 읽지 않은 메시지 발신자들 (안전한 처리)
+        return (unreadMessages || []).filter(user => {
+          // user가 유효한지 확인
+          if (!user || typeof user !== 'object' || !user.id) {
+            return false;
+          }
+          
+          const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              user.username?.toLowerCase().includes(searchTerm.toLowerCase());
+          return matchesSearch;
+        });
       case 1:
         return getFilteredUsersByRole('doctor');
       case 2:
@@ -187,9 +210,21 @@ function FloatingMessageButton({ onClose }) {
       case 3:
         return getFilteredUsersByRole('patient');
       case 4:
-        return getFilteredUsersByRole('staff');
+        // 원무과 - 영상의학과와 동일한 방식으로 필터링
+        return users.filter(user => {
+          const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              user.username?.toLowerCase().includes(searchTerm.toLowerCase());
+          const isStaff = user.user_type === 'staff';
+          console.log(`원무과 필터링: ${user.username}, user_type=${user.user_type}, isStaff=${isStaff}`); // 디버깅 로그
+          return matchesSearch && isStaff;
+        });
       case 5:
-        return getFilteredUsersByRole('admin');
+        return users.filter(user => {
+        const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             user.username?.toLowerCase().includes(searchTerm.toLowerCase());
+        const isRadiologist = ['radio', 'radiologist'].includes(user.user_type);
+        return matchesSearch && isRadiologist;
+      });
       default:
         return [];
     }
@@ -286,7 +321,7 @@ function FloatingMessageButton({ onClose }) {
             <Tab label="간호사" />
             <Tab label="환자" />
             <Tab label="원무과" />
-            <Tab label="관리자" />
+            <Tab label="영상의학과" />
           </Tabs>
 
           <Paper style={{ flex: 1, overflow: 'auto', borderRadius: 0 }}>

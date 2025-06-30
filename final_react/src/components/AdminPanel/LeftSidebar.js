@@ -1,115 +1,99 @@
-// src/components/AdminPanel/LeftSidebar.jsx
+//src/components/AdminPanel/LeftSidebar.jsx
+
 import React from 'react';
-import { Box, List, ListItemButton, ListItemText, Typography } from '@mui/material';
+import { Box, List, ListItemButton, Typography } from '@mui/material';
 import {
   Dashboard, Group, Person, VerifiedUser, Schedule, PersonAdd
 } from '@mui/icons-material';
-import { THEME_COLORS } from '../Common/theme';
 
 const menuItems = [
-  { id: 'dashboard', label: '통합 대시보드', icon: <Dashboard /> },
-  { id: 'reception', label: '환자 접수', icon: <PersonAdd /> },
-  { id: 'appointments', label: '예약 관리', icon: <Schedule /> },
-  { id: 'patients', label: '환자 관리', icon: <Group /> },
-  { id: 'flutter', label: '인증 코드 발급', icon: <Person /> },
+  { id: 'reception', label: '환자 접수', icon: <PersonAdd />, description: '신규 환자 접수 및 등록' },
+  { id: 'appointments', label: '예약 관리', icon: <Schedule />, description: '진료 예약 관리' },
+  { id: 'patients', label: '환자 관리', icon: <Group />, description: '환자 정보 조회 및 관리' },
+  { id: 'flutter', label: '인증 코드 발급', icon: <Person />, description: '모바일 앱 연동 코드' },
 ];
 
-function LeftSidebar({ selectedMenu, onMenuSelect }) {
+function LeftSidebar({ selectedMenu, onMenuSelect, themeColor, accentColor, borderColor }) {
   return (
     <Box sx={{ 
-      width: 200, 
-      height: '100vh', 
-      bgcolor: THEME_COLORS.primary, 
-      color: 'white',
-      display: 'flex',
-      flexDirection: 'column',
-      borderRight: `1px solid ${THEME_COLORS.border}`,
-      boxShadow: '2px 0 4px rgba(0,0,0,0.1)'
+      width: 240, // 간호사 패널과 동일
+      flexShrink: 0,
+      bgcolor: themeColor || '#003d82', 
+      color: 'white', 
+      p: 2, // 간호사 패널과 동일한 padding
+      boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
+      minWidth: 240,
+      maxWidth: 240,
+      overflow: 'auto' // 간호사 패널과 동일하게 스크롤 허용
     }}>
-      <Box sx={{ 
-        p: 1.5, 
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-        bgcolor: THEME_COLORS.primary
-      }}>
-        <Typography variant="h6" fontWeight="bold" fontSize="1rem">
-          🏥 원무과 매니저
+      {/* 진료과 정보 헤더 - 간호사 패널 스타일 적용 */}
+      <Box sx={{ mb: 3, p: 2, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
+        <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+          원무과
         </Typography>
+        <Typography variant="body2" sx={{ opacity: 0.9, mb: 2 }}>
+          환자 접수 및 관리 시스템
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Schedule sx={{ fontSize: 16 }} />
+          <Typography variant="caption">
+            운영시간: 평일 08:00-18:00
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Person sx={{ fontSize: 16 }} />
+          <Typography variant="caption">
+            당직: 이원무 주임 
+            <br />
+            (내선 1234)
+          </Typography>
+        </Box>
       </Box>
-      
-      <List sx={{ flexGrow: 1, p: 0, overflowY: 'auto' }}>
+
+      {/* 메뉴 리스트 - 간호사 패널과 동일한 스타일 */}
+      <List sx={{ p: 0 }}>
         {menuItems.map((item) => (
           <ListItemButton
             key={item.id}
             selected={selectedMenu === item.id}
             onClick={() => {
-              console.log('메뉴 클릭:', item.id); // 디버깅용
+              console.log('메뉴 클릭:', item.id);
               onMenuSelect(item.id);
             }}
             sx={{
-              py: 1,
-              px: 1.5,
-              minHeight: 40,
+              borderRadius: 2,
+              mb: 1,
+              p: 2, // 간호사 패널과 동일한 padding
               '&.Mui-selected': {
-                bgcolor: 'rgba(255,255,255,0.15)',
-                borderRight: `3px solid ${THEME_COLORS.secondary}`,
+                bgcolor: 'rgba(255,255,255,0.2)',
                 '&:hover': {
-                  bgcolor: 'rgba(255,255,255,0.2)'
+                  bgcolor: 'rgba(255,255,255,0.3)',
                 }
               },
               '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.08)'
-              },
-              transition: 'all 0.2s ease-in-out'
+                bgcolor: 'rgba(255,255,255,0.1)',
+              }
             }}
           >
-            {/* 아이콘 렌더링 수정 */}
-            <Box sx={{ 
-              mr: 1.5, 
-              fontSize: '1.2rem', 
-              color: selectedMenu === item.id ? THEME_COLORS.secondary : 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: '24px',
-              minHeight: '24px'
-            }}>
-              {item.icon}
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ color: selectedMenu === item.id ? '#ffffff' : 'rgba(255,255,255,0.8)' }}>
+                  {item.icon}
+                </Box>
+                <Typography fontWeight="600" fontSize="0.9rem"> {/* 간호사 패널과 동일한 폰트 크기 */}
+                  {item.label}
+                </Typography>
+              </Box>
+              <Typography variant="caption" sx={{ 
+                opacity: 0.8, 
+                mt: 0.5 // 간호사 패널과 동일한 margin
+              }}>
+                {item.description}
+              </Typography>
             </Box>
-            <ListItemText 
-              primary={item.label} 
-              primaryTypographyProps={{ fontSize: '0.875rem' }}
-            />
           </ListItemButton>
         ))}
       </List>
-
-      {/* 하단 일정 부분은 동일 */}
-      <Box sx={{ 
-        p: 1.5, 
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        bgcolor: 'rgba(0,0,0,0.1)'
-      }}>
-        <Typography variant="subtitle2" sx={{ mb: 1, fontSize: '0.75rem', color: THEME_COLORS.secondary }}>
-          📅 오늘 일정
-        </Typography>
-        <Box sx={{ 
-          bgcolor: 'rgba(255,255,255,0.1)', 
-          p: 1, 
-          borderRadius: 1,
-          fontSize: '0.7rem',
-          border: `1px solid ${THEME_COLORS.secondary}20`
-        }}>
-          <Typography variant="caption" fontSize="0.7rem">
-            2025년 6월 25일 (수)
-          </Typography>
-          <Typography variant="caption" display="block" fontSize="0.7rem">
-            • 회진: 09:00 ✓
-          </Typography>
-          <Typography variant="caption" display="block" fontSize="0.7rem">
-            • 컨퍼런스: 14:00
-          </Typography>
-        </Box>
-      </Box>
     </Box>
   );
 }

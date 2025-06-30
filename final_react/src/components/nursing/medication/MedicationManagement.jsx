@@ -98,7 +98,7 @@ export default function MedicationManagement({ patients, onRefresh }) {
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
+              <FormControl sx={{ overflow:'visible', width: '120px', margin: '0 auto' }}>
                 <InputLabel>환자 선택</InputLabel>
                 <Select
                   value={newMedication.patientName}

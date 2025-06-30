@@ -21,7 +21,8 @@ def create_medical_staff_profile(sender, instance, created, **kwargs):
                 'doctor': '내과',
                 'nurse': '간호부',
                 'radio': '영상의학과',
-                'radiologist': '영상의학과'
+                'radiologist': '영상의학과',
+                'staff': '원무과'  # ← 이 줄 추가
             }
             
             # 전문분야 설정
@@ -29,7 +30,8 @@ def create_medical_staff_profile(sender, instance, created, **kwargs):
                 'doctor': '일반의',
                 'nurse': '일반간호사',
                 'radio': '영상의학과',
-                'radiologist': '영상의학과'
+                'radiologist': '영상의학과',
+                'staff': '원무과',  # ← 이 줄 추가
             }
             
             medical_staff = MedicalStaff.objects.create(
@@ -48,7 +50,7 @@ def create_medical_staff_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def update_medical_staff_profile(sender, instance, created, **kwargs):
     """의료진 사용자 정보 업데이트 시 MedicalStaff 프로필도 업데이트"""
-    if not created and instance.user_type in ['doctor', 'nurse', 'radio', 'radiologist']:
+    if not created and instance.user_type in ['doctor', 'nurse', 'radio', 'radiologist', 'staff']:
         try:
             medical_staff = MedicalStaff.objects.get(user=instance)
             
